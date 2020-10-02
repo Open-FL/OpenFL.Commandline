@@ -15,14 +15,11 @@ namespace OpenFL.Commandline.Core.Systems
 {
     public class FLRunSystem : FLCommandlineSystem
     {
-
-        private string[] Input;
-        private string[] Output;
+        
         private string[] Defines = new string[0];
         private int ResolutionX = 256;
         private int ResolutionY = 256;
-
-        private bool NoDialog;
+        
         private bool WarmBuffers;
 
 
