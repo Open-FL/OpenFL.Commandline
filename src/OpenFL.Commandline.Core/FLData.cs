@@ -95,7 +95,7 @@ namespace OpenFL.Commandline.Core
             CustomStartupActions?.Invoke();
 
             SetProgress("[Setup]", "Initializing FL", 1, 5, maxTasks);
-            Container = InitializeCLKernels("assets/resources");
+            Container = InitializeCLKernels("resources/kernel");
 
             SetProgress("[Setup]", "Finished", 1, 6, maxTasks);
 
@@ -125,7 +125,7 @@ namespace OpenFL.Commandline.Core
             OpenFLDebugConfig.Settings.MinSeverity = Verbosity.Level2;
             InternalADLProjectDebugConfig.Settings.MinSeverity = Verbosity.Level2;
             ManifestIODebugConfig.Settings.MinSeverity = Verbosity.Level2;
-            ExtPPDebugConfig.Settings.MinSeverity = Verbosity.Level2;
+            ExtPPDebugConfig.Settings.MinSeverity = Verbosity.Level1;
 
             Debug.DefaultInitialization();
 
