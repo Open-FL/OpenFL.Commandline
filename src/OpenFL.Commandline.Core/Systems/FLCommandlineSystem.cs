@@ -11,9 +11,8 @@ using OpenFL.Serialization;
 
 using Utility.CommandRunner;
 using Utility.CommandRunner.BuiltInCommands;
-using Utility.IO.Callbacks;
 
-namespace OpenFL.Commandline.Core
+namespace OpenFL.Commandline.Core.Systems
 {
     public abstract class FLCommandlineSystem : ICommandlineSystem
     {

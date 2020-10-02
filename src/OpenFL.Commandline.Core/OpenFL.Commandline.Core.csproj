@@ -11,5 +11,6 @@
     <ProjectReference Include="..\..\deps\CommandlineSystem\src\CommandlineSystem\CommandlineSystem.csproj" />
     <ProjectReference Include="..\..\deps\OpenFL\deps\OpenCL.Wrapper\deps\Utility\src\Utility\Utility.csproj" />
     <ProjectReference Include="..\..\deps\OpenFL\src\OpenFL\OpenFL.csproj" />
+    <ProjectReference Include="..\..\deps\PluginSystem.Repository\src\PluginSystem.Repository\PluginSystem.Repository.csproj" />
   </ItemGroup>
 </Project>

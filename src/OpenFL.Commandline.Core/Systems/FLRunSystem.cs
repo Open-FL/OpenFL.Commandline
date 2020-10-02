@@ -2,23 +2,16 @@
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Threading;
-
-using CommandlineSystem;
-
-using OpenCL.NET;
 
 using OpenFL.Core;
 using OpenFL.Core.Buffers;
 using OpenFL.Core.DataObjects.ExecutableDataObjects;
 using OpenFL.Core.DataObjects.SerializableDataObjects;
 using OpenFL.Core.Exceptions;
-using OpenFL.Core.Parsing.StageResults;
 
 using Utility.CommandRunner;
-using Utility.CommandRunner.BuiltInCommands;
 
-namespace OpenFL.Commandline.Core
+namespace OpenFL.Commandline.Core.Systems
 {
     public class FLRunSystem : FLCommandlineSystem
     {

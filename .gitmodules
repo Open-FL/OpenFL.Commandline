@@ -6,3 +6,7 @@
 	path = deps/CommandlineSystem
 	url = https://github.com/Open-FL/CommandlineSystem
 	branch = master
+[submodule "deps/PluginSystem.Repository"]
+	path = deps/PluginSystem.Repository
+	url = https://github.com/Open-FL/PluginSystem.Repository
+	branch = master

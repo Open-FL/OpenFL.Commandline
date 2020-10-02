@@ -1,12 +1,11 @@
 ﻿using System.IO;
 
 using OpenFL.Core.DataObjects.SerializableDataObjects;
-using OpenFL.Core.Parsing.StageResults;
 using OpenFL.Serialization;
 
 using Utility.CommandRunner;
 
-namespace OpenFL.Commandline.Core
+namespace OpenFL.Commandline.Core.Systems
 {
     public class FLParseSystem : FLCommandlineSystem
     {
