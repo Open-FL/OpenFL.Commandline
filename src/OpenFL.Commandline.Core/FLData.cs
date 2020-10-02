@@ -116,7 +116,7 @@ namespace OpenFL.Commandline.Core
             Log($"{tag}[DIALOG]", $"{title} :\n\t{message} [Y/n]", 0);
             Console.Write($">");
             string s = Console.ReadLine();
-            return s.ToLower() == "n";
+            return s.ToLower() != "n";
         }
 
         private static void InitializeLogging()
