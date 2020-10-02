@@ -64,7 +64,7 @@ namespace OpenFL.Commandline.Core
             for (int i = 0; i < Input.Length; i++)
             {
                 string input = Path.GetFullPath(Input[i]);
-                if (!SupportedInputExtensions.Select(x => "." + x).Contains(Path.GetExtension(input)))
+                if (!SupportedInputExtensions.Select(x => string.IsNullOrEmpty(x) ? "" : "." + x).Contains(Path.GetExtension(input)))
                 {
                     throw new Exception("Extension is not supported: " + Path.GetExtension(input));
                 }
@@ -75,7 +75,7 @@ namespace OpenFL.Commandline.Core
                                                   )
                                     : Output[i];
                 FLData.SetProgress($"[{Name}]", $"{Path.GetFileName(input)} => {Path.GetFileName(output)}", 1, i, input.Length);
-                if (!SupportedOutputExtensions.Select(x => "." + x).Contains(Path.GetExtension(output)))
+                if (!SupportedOutputExtensions.Select(x => string.IsNullOrEmpty(x) ? "" : "." + x).Contains(Path.GetExtension(output)))
                 {
                     throw new Exception("Extension is not supported: " + Path.GetExtension(output));
                 }

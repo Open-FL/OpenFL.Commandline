@@ -89,7 +89,7 @@ namespace OpenFL.Commandline.Core
         private bool ExportFL;
         private bool KeepFL;
         private string PackageName = "NO_NAME";
-        private string UnpackConfig = "";
+        private string UnpackConfig = "default";
         private string[] Defines = new string[0];
         private string[] ExtraSteps;
 
@@ -100,7 +100,7 @@ namespace OpenFL.Commandline.Core
             runner._AddCommand(new SetDataCommand(s => KeepFL =true, new[] { "--keep-fl" }, "When Exporting FL the FL Scripts are not Deleted"));
             runner._AddCommand(new SetDataCommand(s => ExportFL=true, new[] { "--export-fl", "-export" }, "Export FL Scripts to FLC before packing"));
             runner._AddCommand(new SetDataCommand(s => PackageName = s.First(), new[] { "--name", "-n" }, "Set Package Name"));
-            runner._AddCommand(new SetDataCommand(s => UnpackConfig = s.First(), new[] { "--extra-steps", "-e" }, "Set Unpack Config"));
+            runner._AddCommand(new SetDataCommand(s => UnpackConfig = s.First(), new[] { "--unpack-config", "-u" }, "Set Unpack Config"));
         }
 
 
@@ -135,7 +135,7 @@ namespace OpenFL.Commandline.Core
                     SerializableFLProgram prog = Parse(file, Defines);
 
                     string f = file + "c";
-                    Save(file, prog, ExtraSteps);
+                    Save(f, prog, ExtraSteps);
 
                     if (!KeepFL)
                     {
@@ -147,6 +147,7 @@ namespace OpenFL.Commandline.Core
             FLData.SetProgress($"[{Name}]", "Creating Package.", 1, currentProgress, maxProgress);
             currentProgress++;
 
+            Directory.SetCurrentDirectory(oldDir);
             ResourceManager.Create(
                                    input,
                                    output,
@@ -156,7 +157,7 @@ namespace OpenFL.Commandline.Core
                                   );
 
             FLData.SetProgress($"[{Name}]", "Cleaning Up.", 1, currentProgress, maxProgress);
-            Directory.SetCurrentDirectory(oldDir);
+
 
         }
 
