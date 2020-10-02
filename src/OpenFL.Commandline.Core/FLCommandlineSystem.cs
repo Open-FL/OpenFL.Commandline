@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -10,6 +11,7 @@ using OpenFL.Serialization;
 
 using Utility.CommandRunner;
 using Utility.CommandRunner.BuiltInCommands;
+using Utility.IO.Callbacks;
 
 namespace OpenFL.Commandline.Core
 {
@@ -20,6 +22,8 @@ namespace OpenFL.Commandline.Core
         private string[] Input = new string[0];
         private bool NoDialog;
 
+
+        public virtual bool ExpandInputDirectories => false;
         public abstract string Name { get; }
         public abstract string[] SupportedInputExtensions { get; }
         public abstract string[] SupportedOutputExtensions { get; }
@@ -38,10 +42,29 @@ namespace OpenFL.Commandline.Core
 
             BeforeRun();
 
+            if (ExpandInputDirectories)
+            {
+                List<string> newInput = new List<string>();
+                foreach (string s in Input)
+                {
+                    if (Path.GetExtension(s) == "")
+                    {
+                        newInput.AddRange(Directory.GetFiles(s, "*.flc", SearchOption.AllDirectories));
+                        newInput.AddRange(Directory.GetFiles(s, "*.fl", SearchOption.AllDirectories));
+                    }
+                    else
+                    {
+                        newInput.Add(s);
+                    }
+                }
+
+                Input = newInput.ToArray();
+            }
+
             for (int i = 0; i < Input.Length; i++)
             {
                 string input = Path.GetFullPath(Input[i]);
-                if (!SupportedInputExtensions.Select(x=> "." + x).Contains(Path.GetExtension(input)))
+                if (!SupportedInputExtensions.Select(x => "." + x).Contains(Path.GetExtension(input)))
                 {
                     throw new Exception("Extension is not supported: " + Path.GetExtension(input));
                 }

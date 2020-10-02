@@ -2,13 +2,17 @@
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 using CommandlineSystem;
+
+using OpenCL.NET;
 
 using OpenFL.Core;
 using OpenFL.Core.Buffers;
 using OpenFL.Core.DataObjects.ExecutableDataObjects;
 using OpenFL.Core.DataObjects.SerializableDataObjects;
+using OpenFL.Core.Exceptions;
 using OpenFL.Core.Parsing.StageResults;
 
 using Utility.CommandRunner;
@@ -28,6 +32,8 @@ namespace OpenFL.Commandline.Core
         private bool NoDialog;
         private bool WarmBuffers;
 
+
+        public override bool ExpandInputDirectories => true;
 
         public override string Name => "run";
 
@@ -54,14 +60,21 @@ namespace OpenFL.Commandline.Core
             FLProgram program = prog.Initialize(FLData.Container);
 
 
+            try
+            {
+                FLData.Log($"[{Name}]", "Running", 2);
+                program.Run(buffer, false, null, WarmBuffers);
 
-            FLData.Log($"[{Name}]", "Running", 2);
-            program.Run(buffer, false, null, WarmBuffers);
-
-            FLData.Log($"[{Name}]", "Saving", 2);
-            Bitmap bmp = program.GetActiveBitmap();
-            bmp.Save(output);
-            bmp.Dispose();
+                FLData.Log($"[{Name}]", "Saving", 2);
+                Bitmap bmp = program.GetActiveBitmap();
+                bmp.Save(output);
+                bmp.Dispose();
+            }
+            catch (FLInvalidEntryPointException e)
+            {
+                FLData.Log($"[{Name}]", "No Entry Point Found. Skipping", 2);
+            }
+            
             program.FreeResources();
             buffer.Dispose();
         }
