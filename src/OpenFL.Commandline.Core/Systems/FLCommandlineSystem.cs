@@ -27,6 +27,8 @@ namespace OpenFL.Commandline.Core.Systems
         public abstract string[] SupportedInputExtensions { get; }
         public abstract string[] SupportedOutputExtensions { get; }
 
+        private int Verbosity=1;
+
         public void Run(string[] args)
         {
             Runner r = new Runner();
@@ -34,10 +36,11 @@ namespace OpenFL.Commandline.Core.Systems
             r._AddCommand(new SetDataCommand(s => Input = s, new[] { "--input", "-i" }, "Set Input Files"));
             r._AddCommand(new SetDataCommand(s => Output = s, new[] { "--output", "-o" }, "Set Output Files"));
             r._AddCommand(new SetDataCommand(s => NoDialog = true, new[] { "--yes", "-y" }, "Answer all dialogs with Yes"));
+            r._AddCommand(new SetDataCommand(strings => Verbosity = int.Parse(strings.First()), new[] { "--verbosity", "-v" }, "The Verbosity Level (lower = less logs)"));
             AddCommands(r);
             r._RunCommands(args);
 
-            FLData.InitializeFL(NoDialog);
+            FLData.InitializeFL(NoDialog, Verbosity);
 
             BeforeRun();
 

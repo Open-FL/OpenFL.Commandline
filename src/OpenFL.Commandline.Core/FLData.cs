@@ -57,13 +57,13 @@ namespace OpenFL.Commandline.Core
                                                                                          new ProjectDebugConfig("FL", -1, 2, PrefixLookupSettings.AddPrefixIfAvailable));
         private static bool NoDialogs;
 
-        public static void InitializePluginSystemOnly(bool noDialogs)
+        public static void InitializePluginSystemOnly(bool noDialogs, int verbosity)
         {
             NoDialogs = noDialogs;
             int maxTasks = 3;
 
             SetProgress("[Setup]", "Initializing Logging System", 1, 1, maxTasks);
-            InitializeLogging();
+            InitializeLogging((Verbosity) verbosity);
 
             SetProgress("[Setup]", "Initializing Resource System", 1, 2, maxTasks);
             InitializeResourceSystem();
@@ -72,7 +72,7 @@ namespace OpenFL.Commandline.Core
             InitializePluginSystem();
         }
 
-        public static void InitializeFL(bool noDialogs)
+        public static void InitializeFL(bool noDialogs, int verbosity)
         {
             NoDialogs = noDialogs;
             int maxTasks = 6;
@@ -81,7 +81,7 @@ namespace OpenFL.Commandline.Core
             PrepareFileSystem();
 
             SetProgress("[Setup]", "Initializing Logging System", 1, 1, maxTasks);
-            InitializeLogging();
+            InitializeLogging((Verbosity)verbosity);
 
             SetProgress("[Setup]", "Initializing Resource System", 1, 2, maxTasks);
             InitializeResourceSystem();
@@ -119,13 +119,13 @@ namespace OpenFL.Commandline.Core
             return s.ToLower() != "n";
         }
 
-        private static void InitializeLogging()
+        private static void InitializeLogging(Verbosity verbosity)
         {
-            OpenCLDebugConfig.Settings.MinSeverity = Verbosity.Level2;
-            OpenFLDebugConfig.Settings.MinSeverity = Verbosity.Level2;
-            InternalADLProjectDebugConfig.Settings.MinSeverity = Verbosity.Level2;
-            ManifestIODebugConfig.Settings.MinSeverity = Verbosity.Level2;
-            ExtPPDebugConfig.Settings.MinSeverity = Verbosity.Level1;
+            OpenCLDebugConfig.Settings.MinSeverity = verbosity;
+            OpenFLDebugConfig.Settings.MinSeverity = verbosity;
+            InternalADLProjectDebugConfig.Settings.MinSeverity = verbosity;
+            ManifestIODebugConfig.Settings.MinSeverity = verbosity;
+            ExtPPDebugConfig.Settings.MinSeverity = verbosity;
 
             Debug.DefaultInitialization();
 

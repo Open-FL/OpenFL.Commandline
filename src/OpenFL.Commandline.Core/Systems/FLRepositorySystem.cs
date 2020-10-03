@@ -1,16 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 
 using CommandlineSystem;
 
 using PluginSystem.Core;
 using PluginSystem.Core.Interfaces;
 using PluginSystem.Core.Pointer;
+using PluginSystem.FileSystem;
+using PluginSystem.Loading.Plugins;
 using PluginSystem.Repository;
 using PluginSystem.StartupActions;
+using PluginSystem.Utility;
 
 using Utility.CommandRunner;
 using Utility.CommandRunner.BuiltInCommands;
@@ -32,6 +37,8 @@ namespace OpenFL.Commandline.Core.Systems
         private string[] OriginRemoves = new string[0];
         private bool InstallAll;
         private bool DefaultOrigin;
+        private bool ListPackages;
+        private int Verbosity;
 
 
         public void Run(string[] args)
@@ -49,12 +56,15 @@ namespace OpenFL.Commandline.Core.Systems
             r._AddCommand(new SetDataCommand(strings => OriginAdds = strings, new[] { "--add-origin", "-ao" }, "Adds an Origin Url to the Origins File"));
             r._AddCommand(new SetDataCommand(strings => DefaultOrigin = true, new[] { "--default-origin", "-default" }, "Writes the Default Origin File to Disk, overwriting the current origin file"));
             r._AddCommand(new SetDataCommand(strings => InstallAll = true, new[] { "--all", "-all" }, "Installs and activates All packages from all repositories"));
+            r._AddCommand(new SetDataCommand(strings => ListPackages = true, new[] { "--list-packages", "-list" }, "Lists All packages from all repositories"));
+            r._AddCommand(new SetDataCommand(strings => Verbosity = int.Parse(strings.First()), new[] { "--verbosity", "-v" }, "The Verbosity Level (lower = less logs)"));
 
 
-            FLData.InitializePluginSystemOnly(true);
+
+            FLData.InitializePluginSystemOnly(true, Verbosity);
 
             repo = GetPlugin(DefaultOrigin);
-            
+
 
             r._RunCommands(args);
 
@@ -64,6 +74,28 @@ namespace OpenFL.Commandline.Core.Systems
             }
 
             List<Repository> repos = repo.GetPlugins();
+            IEnumerable<BasePluginPointer> global =
+                ListHelper.LoadList(PluginPaths.GlobalPluginListFile).Select(x => new BasePluginPointer(x));
+            IEnumerable<BasePluginPointer> active =
+                ListHelper.LoadList(PluginPaths.PluginListFile).Select(x => new BasePluginPointer(x));
+            if (ListPackages)
+            {
+                Console.WriteLine("Available Packages: ");
+                foreach (Repository repository in repos)
+                {
+                    Console.WriteLine($"\tRepository: {repository.RepositoryOrigin}");
+                    foreach (BasePluginPointer basePluginPointer in repository.Plugins)
+                    {
+                        BasePluginPointer installedPtr = global.FirstOrDefault(x => x.PluginOrigin == basePluginPointer.PluginOrigin);
+                        bool contained = installedPtr != null;
+                        bool installed = contained && active.Any(x => x.PluginOrigin == basePluginPointer.PluginOrigin);
+                        string tag = installed ? "[ACTIVE]" : contained ? "[INSTALLED]" : "[NOT INSTALLED]";
+                        Console.WriteLine($"\t\t{tag} {basePluginPointer.PluginName}");
+                        Console.WriteLine($"\t\t\tVersion(Origin): {basePluginPointer.PluginVersion}");
+                        Console.WriteLine($"\t\t\tVersion(Installed): {installedPtr?.PluginVersion?.ToString() ?? "NOT INSTALLED"}");
+                    }
+                }
+            }
 
             if (InstallAll)
             {
