@@ -27,16 +27,19 @@ namespace OpenFL.Commandline.Core.Systems
         private int Verbosity=4;
         private string[] Unpack;
         private string[] List;
-
+        private string[] FileList;
+        private string[] FileUnpack;
 
         public void Run(string[] args)
         {
-
+            CommandRunnerDebugConfig.Settings.MinSeverity = Utility.ADL.Verbosity.Level3;
             Runner r = new Runner();
             r._AddCommand(new SetDataCommand(strings => Verbosity = int.Parse(strings.First()), new[] { "--verbosity", "-v" }, "The Verbosity Level (lower = less logs)"));
             r._AddCommand(new DefaultHelpCommand(true));
             r._AddCommand(new SetDataCommand(strings => Unpack = strings, new[] { "--unpack", "-unpack" }, "Unpacks a plugins assembly data by name"));
             r._AddCommand(new SetDataCommand(strings => List = strings, new[] { "--list", "-list" }, "Lists All loaded files or All files inside an assembly if arguments are passed"));
+            r._AddCommand(new SetDataCommand(strings => FileUnpack = strings, new[] { "--unpack-file", "-unpack-file" }, "Unpacks a plugins assembly data by file"));
+            r._AddCommand(new SetDataCommand(strings => FileList = strings, new[] { "--list-file", "-list-file" }, "Lists All loaded files or All files inside an assembly if arguments are passed"));
 
             FLData.InitializePluginSystemOnly(true, Verbosity);
 
@@ -45,55 +48,74 @@ namespace OpenFL.Commandline.Core.Systems
             IEnumerable<BasePluginPointer> global =
                 ListHelper.LoadList(PluginPaths.GlobalPluginListFile).Select(x => new BasePluginPointer(x));
 
-            if (Unpack != null)
+            Run((y) => global.FirstOrDefault(x => x.PluginName == y)?.PluginFile, Unpack, List);
+
+            Run(Path.GetFullPath, FileUnpack, FileList);
+        }
+
+        private void Run(Func<string, string> assemblyFileResolve, string[] unpack, string[] list)
+        {
+            if (unpack != null)
             {
-                if (Unpack.Length == 0)
+                if (unpack.Length == 0)
                 {
                     Console.WriteLine("Invalid Unpack Argument Count.\nExpected: <plugin-name> or <plugin-name> <folder1> <folder2> ...");
-
                 }
                 else
                 {
-                    BasePluginPointer ptr = global.FirstOrDefault(x => x.PluginName == Unpack[0]);
+
+                    string ptr = assemblyFileResolve(unpack[0]);
                     if (ptr == null)
                     {
                         Console.WriteLine("Can not find plugin with that name.");
                     }
-                    else if (Unpack.Length == 1) //Specific Plugin
+                    else if (unpack.Length == 1) //Specific Plugin
                     {
-                        Assembly asm = PluginLoader.SaveLoadFrom(PluginPaths.GetPluginAssemblyFile(ptr));
+                        Assembly asm = PluginLoader.SaveLoadFrom(ptr);
+
+                        if (asm == null)
+                        {
+                            Console.WriteLine("Can not Load Plugin: " + ptr);
+                        }
+
                         string[] files = ManifestReader.AllFilesFromAssembly(asm);
                         UnpackResources(files);
 
 
                     }
-                    else if (Unpack.Length > 1) //Folders from a specific plugin
+                    else if (unpack.Length > 1) //Folders from a specific plugin
                     {
-                        Assembly asm = PluginLoader.SaveLoadFrom(PluginPaths.GetPluginAssemblyFile(ptr));
-                        IEnumerable<string> files = ManifestReader.AllFilesFromAssembly(asm).Where(x => Unpack.Skip(1).Any(x.StartsWith));
+                        Assembly asm = PluginLoader.SaveLoadFrom(ptr);
+
+                        if (asm == null)
+                        {
+                            Console.WriteLine("Can not Load Plugin: " + ptr);
+                        }
+
+                        IEnumerable<string> files = ManifestReader.AllFilesFromAssembly(asm).Where(x => unpack.Skip(1).Any(x.StartsWith));
                         UnpackResources(files);
                     }
                 }
             }
-            else if (List != null)
+            else if (list != null)
             {
                 IEnumerable<string> files = ManifestReader.Files;
-                if(List.Length != 0)
+                if (list.Length != 0)
                 {
-                    BasePluginPointer ptr = global.FirstOrDefault(x => x.PluginName == List[0]);
+                    string ptr = assemblyFileResolve(list[0]);
                     if (ptr == null)
                     {
                         files = ManifestReader.Files;
                     }
-                    else if (List.Length == 1) //Specific Plugin
+                    else if (list.Length == 1) //Specific Plugin
                     {
-                        Assembly asm = PluginLoader.SaveLoadFrom(PluginPaths.GetPluginAssemblyFile(ptr));
+                        Assembly asm = PluginLoader.SaveLoadFrom(ptr);
                         files = ManifestReader.AllFilesFromAssembly(asm);
                     }
-                    else if (List.Length > 1) //Folders from a specific plugin
+                    else if (list.Length > 1) //Folders from a specific plugin
                     {
-                        Assembly asm = PluginLoader.SaveLoadFrom(PluginPaths.GetPluginAssemblyFile(ptr));
-                        files = ManifestReader.AllFilesFromAssembly(asm).Where(x => List.Skip(1).Any(x.StartsWith));
+                        Assembly asm = PluginLoader.SaveLoadFrom(ptr);
+                        files = ManifestReader.AllFilesFromAssembly(asm).Where(x => list.Skip(1).Any(x.StartsWith));
                     }
                 }
                 Console.WriteLine("Listing Assembly Files:");
@@ -104,7 +126,6 @@ namespace OpenFL.Commandline.Core.Systems
                 }
             }
         }
-
 
         private void UnpackResources(IEnumerable<string> files)
         {
