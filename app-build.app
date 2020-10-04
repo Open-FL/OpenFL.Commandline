@@ -7,6 +7,6 @@ flags: NO_INFO_TO_ZIP;NO_STRUCTURE
 solution: .\src\%project-name%.sln
 buildout: .\src\%project-name%\bin\%branch%
 buildcmd: msbuild {0} /t:Build /p:Configuration=%branch%
-include: %buildout%\%name%.exe.config
+include: %buildout%\%name%.exe.config;.\fl.bat
 target: %buildout%\%name%.exe
 output: .\docs\latest\%name%.zip
