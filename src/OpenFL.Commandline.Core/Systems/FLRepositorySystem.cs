@@ -22,6 +22,19 @@ using Utility.CommandRunner.BuiltInCommands;
 
 namespace OpenFL.Commandline.Core.Systems
 {
+    public class FLEditorDownloadSystem : ICommandlineSystem
+    {
+
+        public string Name => "download-fl-edit";
+
+        public void Run(string[] args)
+        {
+            Bootstrap.InitiateBatchUpdate("fledit", "", null);
+        }
+
+    }
+
+
     public class FLRepositorySystem : ICommandlineSystem
     {
 
@@ -44,7 +57,7 @@ namespace OpenFL.Commandline.Core.Systems
         public void Run(string[] args)
         {
             Runner r = new Runner();
-            
+
             r._AddCommand(new DefaultHelpCommand());
             r._AddCommand(new SetDataCommand(strings => PackageAdds = strings, new[] { "--add", "-a" }, "Adds a Plugin package by name"));
             r._AddCommand(new SetDataCommand(strings => PackageAdds = strings, new[] { "--add-activate", "-aa" }, "Adds and activates a Plugin package by name"));
@@ -191,7 +204,7 @@ namespace OpenFL.Commandline.Core.Systems
                                            );
                 }
             }
-            
+
             return repoPlugin;
         }
 
