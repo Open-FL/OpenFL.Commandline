@@ -1,5 +1,14 @@
 name: fl-systems
-include: .\src\OpenFL.Commandline.Core\bin\Debug\netstandard2.0\Utility.dll;.\src\OpenFL.Commandline.Core\bin\Debug\netstandard2.0\PluginSystem*.dll;.\src\OpenFL.Commandline.Core\bin\Debug\netstandard2.0\OpenCL*.dll;.\src\OpenFL.Commandline.Core\bin\Debug\netstandard2.0\OpenFL.dll
-target: .\src\OpenFL.Commandline.Core\bin\Debug\netstandard2.0\OpenFL.Commandline.Core.dll
-output: .\docs\latest\fl-systems.zip
+branch: Debug
+project-name: OpenFL.Commandline.Core
 flags: NO_INFO_TO_ZIP;NO_STRUCTURE
+
+#Additional Build Info
+solution: .\src\OpenFL.Commandline.sln
+include: %buildout%\Utility.dll;%buildout%\PluginSystem*.dll;%buildout%\OpenCL*.dll;%buildout%\OpenFL.dll
+
+#Build Info
+buildout: .\src\%project-name%\bin\%branch%\netstandard2.0
+buildcmd: msbuild {0} /t:Build /p:Configuration=%branch%
+target: %buildout%\%project-name%.dll
+output: .\docs\latest\%name%.zip
