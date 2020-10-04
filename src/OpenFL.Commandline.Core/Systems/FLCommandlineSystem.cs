@@ -9,6 +9,7 @@ using OpenFL.Core.DataObjects.SerializableDataObjects;
 using OpenFL.Core.Parsing.StageResults;
 using OpenFL.Serialization;
 
+using Utility.ADL.Configs;
 using Utility.CommandRunner;
 using Utility.CommandRunner.BuiltInCommands;
 
@@ -31,6 +32,8 @@ namespace OpenFL.Commandline.Core.Systems
 
         public void Run(string[] args)
         {
+            ProjectDebugConfig.OnConfigCreate += ProjectDebugConfig_OnConfigCreate;
+
             Runner r = new Runner();
             r._AddCommand(new SetDataCommand(s => Input = s, new[] { "--input", "-i" }, "Set Input Files"));
             r._AddCommand(new SetDataCommand(s => Output = s, new[] { "--output", "-o" }, "Set Output Files"));
@@ -84,6 +87,12 @@ namespace OpenFL.Commandline.Core.Systems
                 Run(input, output);
             }
 
+            ProjectDebugConfig.OnConfigCreate -= ProjectDebugConfig_OnConfigCreate;
+        }
+
+        private void ProjectDebugConfig_OnConfigCreate(ProjectDebugConfig obj)
+        {
+            obj.MinSeverity = Verbosity;
         }
 
         protected virtual void BeforeRun()

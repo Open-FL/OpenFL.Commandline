@@ -4,6 +4,7 @@ using CommandlineSystem;
 
 using PluginSystem.StartupActions;
 
+using Utility.ADL.Configs;
 using Utility.CommandRunner;
 using Utility.CommandRunner.BuiltInCommands;
 
@@ -19,6 +20,7 @@ namespace OpenFL.Commandline.Core.Systems
 
         public void Run(string[] args)
         {
+            ProjectDebugConfig.OnConfigCreate += ProjectDebugConfig_OnConfigCreate;
             Runner r = new Runner();
             r._AddCommand(new SetDataCommand(strings => Adds = strings, new[] { "--add", "-a" }, "Adds a Plugin package"));
             r._AddCommand(new SetDataCommand(strings => Removes = strings, new[] { "--remove", "-r" }, "Removes a Plugin package"));
@@ -39,8 +41,12 @@ namespace OpenFL.Commandline.Core.Systems
                 ActionRunner.AddActionToStartup($"{ActionRunner.ADD_ACTIVATE_PACKAGE_ACTION} {adds}");
             }
 
+            ProjectDebugConfig.OnConfigCreate -= ProjectDebugConfig_OnConfigCreate;
         }
 
-
+        private void ProjectDebugConfig_OnConfigCreate(ProjectDebugConfig obj)
+        {
+            obj.MinSeverity = Verbosity;
+        }
     }
 }

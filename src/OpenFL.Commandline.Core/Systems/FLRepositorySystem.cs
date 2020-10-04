@@ -17,24 +17,12 @@ using PluginSystem.Repository;
 using PluginSystem.StartupActions;
 using PluginSystem.Utility;
 
+using Utility.ADL.Configs;
 using Utility.CommandRunner;
 using Utility.CommandRunner.BuiltInCommands;
 
 namespace OpenFL.Commandline.Core.Systems
 {
-    public class FLEditorDownloadSystem : ICommandlineSystem
-    {
-
-        public string Name => "download-fl-edit";
-
-        public void Run(string[] args)
-        {
-            Bootstrap.InitiateBatchUpdate("fledit", "https://open-fl.github.io/OpenFL.Editor/latest/fledit.zip", null);
-        }
-
-    }
-
-
     public class FLRepositorySystem : ICommandlineSystem
     {
 
@@ -56,6 +44,8 @@ namespace OpenFL.Commandline.Core.Systems
 
         public void Run(string[] args)
         {
+            ProjectDebugConfig.OnConfigCreate += ProjectDebugConfig_OnConfigCreate;
+
             Runner r = new Runner();
 
             r._AddCommand(new DefaultHelpCommand());
@@ -169,6 +159,14 @@ namespace OpenFL.Commandline.Core.Systems
                 ActionRunner.AddActionToStartup($"{ActionRunner.ACTIVATE_PACKAGE_ACTION} {packageActivate}");
             }
 
+
+            ProjectDebugConfig.OnConfigCreate += ProjectDebugConfig_OnConfigCreate;
+
+        }
+
+        private void ProjectDebugConfig_OnConfigCreate(ProjectDebugConfig obj)
+        {
+            obj.MinSeverity = Verbosity;
         }
 
         private string GetPackage(List<Repository> repos, string name)
