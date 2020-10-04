@@ -4,6 +4,6 @@
     <StartArguments>repo -default -all</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <StartArguments>repo -default -all</StartArguments>
+    <StartArguments>repo -default -all -v 10</StartArguments>
   </PropertyGroup>
 </Project>

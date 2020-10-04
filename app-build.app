@@ -1,5 +1,5 @@
 name: fl
-branch: Debug
+branch: Release
 project-name: OpenFL.Commandline
 flags: NO_INFO_TO_ZIP;NO_STRUCTURE
 
