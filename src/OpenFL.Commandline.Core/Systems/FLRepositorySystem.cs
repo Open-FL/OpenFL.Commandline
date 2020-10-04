@@ -68,7 +68,9 @@ namespace OpenFL.Commandline.Core.Systems
 
             if (DefaultOrigin)
             {
-                WriteDefaultOrigin(RepositoryPlugin.GetOriginFilePath(GetDefaultRepoPluginPointer()));
+                string file = RepositoryPlugin.GetOriginFilePath(GetDefaultRepoPluginPointer());
+                Directory.CreateDirectory(Path.GetDirectoryName(file));
+                WriteDefaultOrigin(file);
             }
             else
             {
