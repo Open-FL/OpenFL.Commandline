@@ -32,11 +32,11 @@ namespace OpenFL.Commandline.Core.Systems
         public void Run(string[] args)
         {
             Runner r = new Runner();
-            r._AddCommand(new DefaultHelpCommand(true));
             r._AddCommand(new SetDataCommand(s => Input = s, new[] { "--input", "-i" }, "Set Input Files"));
             r._AddCommand(new SetDataCommand(s => Output = s, new[] { "--output", "-o" }, "Set Output Files"));
             r._AddCommand(new SetDataCommand(s => NoDialog = true, new[] { "--yes", "-y" }, "Answer all dialogs with Yes"));
             r._AddCommand(new SetDataCommand(strings => Verbosity = int.Parse(strings.First()), new[] { "--verbosity", "-v" }, "The Verbosity Level (lower = less logs)"));
+            r._AddCommand(new DefaultHelpCommand(true));
             AddCommands(r);
             r._RunCommands(args);
 

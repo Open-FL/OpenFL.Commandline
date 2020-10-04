@@ -24,16 +24,17 @@ namespace OpenFL.Commandline.Core.Systems
 
         public string Name => "asm-browser";
 
-        private int Verbosity;
+        private int Verbosity=4;
         private string[] Unpack;
         private string[] List;
 
 
         public void Run(string[] args)
         {
+
             Runner r = new Runner();
-            r._AddCommand(new DefaultHelpCommand(true));
             r._AddCommand(new SetDataCommand(strings => Verbosity = int.Parse(strings.First()), new[] { "--verbosity", "-v" }, "The Verbosity Level (lower = less logs)"));
+            r._AddCommand(new DefaultHelpCommand(true));
             r._AddCommand(new SetDataCommand(strings => Unpack = strings, new[] { "--unpack", "-unpack" }, "Unpacks a plugins assembly data by name"));
             r._AddCommand(new SetDataCommand(strings => List = strings, new[] { "--list", "-list" }, "Lists All loaded files or All files inside an assembly if arguments are passed"));
 

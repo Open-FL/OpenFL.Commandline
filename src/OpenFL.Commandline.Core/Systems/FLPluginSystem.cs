@@ -20,10 +20,10 @@ namespace OpenFL.Commandline.Core.Systems
         public void Run(string[] args)
         {
             Runner r = new Runner();
-            r._AddCommand(new DefaultHelpCommand());
             r._AddCommand(new SetDataCommand(strings => Adds = strings, new[] { "--add", "-a" }, "Adds a Plugin package"));
             r._AddCommand(new SetDataCommand(strings => Removes = strings, new[] { "--remove", "-r" }, "Removes a Plugin package"));
             r._AddCommand(new SetDataCommand(strings => Verbosity = int.Parse(strings.First()), new[] { "--verbosity", "-v" }, "The Verbosity Level (lower = less logs)"));
+            r._AddCommand(new DefaultHelpCommand(true));
 
             r._RunCommands(args);
 
