@@ -74,7 +74,7 @@ namespace OpenFL.Commandline.Core.Systems
             }
             else
             {
-                CheckOriginsExists();
+                CheckOriginsExists(GetDefaultRepoPluginPointer());
             }
 
             RepositoryPlugin repo = GetPlugin();
@@ -195,18 +195,20 @@ namespace OpenFL.Commandline.Core.Systems
             return repoPlugin;
         }
 
-        private void CheckOriginsExists()
+        private void CheckOriginsExists(PluginAssemblyPointer ptr)
         {
-            if (!File.Exists(repoPlugin.OriginFile))
+            string file = RepositoryPlugin.GetOriginFilePath(ptr);
+            Directory.CreateDirectory(Path.GetDirectoryName(file));
+            if (!File.Exists(file))
             {
                 bool res = FLData.ShowDialog(
                                              "[repo]",
-                                             $"{repoPlugin.PluginAssemblyData.PluginName}: First Startup.",
+                                             $"{ptr.PluginName}: First Startup.",
                                              "Do you want to create the default Origins File?"
                                             );
                 if (res)
                 {
-                    WriteDefaultOrigin(repoPlugin.OriginFile);
+                    WriteDefaultOrigin(file);
                 }
             }
 
