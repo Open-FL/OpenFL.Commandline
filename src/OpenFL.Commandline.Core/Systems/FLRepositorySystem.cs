@@ -29,7 +29,7 @@ namespace OpenFL.Commandline.Core.Systems
 
         public void Run(string[] args)
         {
-            Bootstrap.InitiateBatchUpdate("fledit", "", null);
+            Bootstrap.InitiateBatchUpdate("fledit", "https://open-fl.github.io/OpenFL.Editor/latest/fledit.zip", null);
         }
 
     }
