@@ -44,8 +44,7 @@ namespace OpenFL.Commandline.Core.Systems
         public void Run(string[] args)
         {
             Runner r = new Runner();
-
-            RepositoryPlugin repo = null;
+            
             r._AddCommand(new DefaultHelpCommand());
             r._AddCommand(new SetDataCommand(strings => PackageAdds = strings, new[] { "--add", "-a" }, "Adds a Plugin package by name"));
             r._AddCommand(new SetDataCommand(strings => PackageAdds = strings, new[] { "--add-activate", "-aa" }, "Adds and activates a Plugin package by name"));
@@ -63,15 +62,20 @@ namespace OpenFL.Commandline.Core.Systems
 
             FLData.InitializePluginSystemOnly(true, Verbosity);
 
-            repo = GetPlugin(DefaultOrigin);
 
 
             r._RunCommands(args);
 
             if (DefaultOrigin)
             {
-                WriteDefaultOrigin(repo);
+                WriteDefaultOrigin(RepositoryPlugin.GetOriginFilePath(GetDefaultRepoPluginPointer()));
             }
+            else
+            {
+                CheckOriginsExists();
+            }
+
+            RepositoryPlugin repo = GetPlugin();
 
             List<Repository> repos = repo.GetPlugins();
             IEnumerable<BasePluginPointer> global =
@@ -158,7 +162,18 @@ namespace OpenFL.Commandline.Core.Systems
                         .First(x => x.PluginName == name).PluginOrigin;
         }
 
-        private RepositoryPlugin GetPlugin(bool noOriginsCheck)
+        private PluginAssemblyPointer GetDefaultRepoPluginPointer()
+        {
+            return new PluginAssemblyPointer(
+                                             "repository-plugin",
+                                             "",
+                                             "",
+                                             "0.0.0.0",
+                                             PluginManager.PluginHost
+                                            );
+        }
+
+        private RepositoryPlugin GetPlugin()
         {
             if (repoPlugin == null)
             {
@@ -166,13 +181,7 @@ namespace OpenFL.Commandline.Core.Systems
                 if (repoPlugin == null)
                 {
                     repoPlugin = new RepositoryPlugin();
-                    PluginAssemblyPointer ptr = new PluginAssemblyPointer(
-                                                                          "repository-plugin",
-                                                                          "",
-                                                                          "",
-                                                                          "0.0.0.0",
-                                                                          PluginManager.PluginHost
-                                                                         );
+                    PluginAssemblyPointer ptr = GetDefaultRepoPluginPointer();
 
                     PluginManager.AddPlugin(
                                             repoPlugin,
@@ -180,7 +189,13 @@ namespace OpenFL.Commandline.Core.Systems
                                            );
                 }
             }
-            if (!noOriginsCheck && !File.Exists(repoPlugin.OriginFile))
+            
+            return repoPlugin;
+        }
+
+        private void CheckOriginsExists()
+        {
+            if (!File.Exists(repoPlugin.OriginFile))
             {
                 bool res = FLData.ShowDialog(
                                              "[repo]",
@@ -189,16 +204,15 @@ namespace OpenFL.Commandline.Core.Systems
                                             );
                 if (res)
                 {
-                    WriteDefaultOrigin(repoPlugin);
+                    WriteDefaultOrigin(repoPlugin.OriginFile);
                 }
             }
 
-            return repoPlugin;
         }
 
-        private void WriteDefaultOrigin(RepositoryPlugin repo)
+        private void WriteDefaultOrigin(string originFile)
         {
-            File.WriteAllText(repo.OriginFile, GetDefaultOrigin());
+            File.WriteAllText(originFile, GetDefaultOrigin());
         }
 
         private string GetDefaultOrigin()
