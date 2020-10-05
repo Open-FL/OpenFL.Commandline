@@ -12,27 +12,58 @@ namespace OpenFL.Commandline.Core.Systems
     public class FLPackerSystem : FLCommandlineSystem
     {
 
+        private string[] Defines = new string[0];
+
+        private bool ExportFL;
+        private string[] ExtraSteps;
+        private bool KeepFL;
+        private string PackageName = "NO_NAME";
+        private string UnpackConfig = "default";
+
         public override string[] SupportedInputExtensions => new[] { "" };
 
         public override string[] SupportedOutputExtensions => new[] { "flres" };
 
         public override string Name => "packer";
 
-        private bool ExportFL;
-        private bool KeepFL;
-        private string PackageName = "NO_NAME";
-        private string UnpackConfig = "default";
-        private string[] Defines = new string[0];
-        private string[] ExtraSteps;
-
         protected override void AddCommands(Runner runner)
         {
             runner._AddCommand(new SetDataCommand(s => Defines = s, new[] { "--defines", "-d" }, "Set Define Tags"));
-            runner._AddCommand(new SetDataCommand(s => ExtraSteps = s, new[] { "--extra-steps", "-e" }, "Set Extra Serialization Steps"));
-            runner._AddCommand(new SetDataCommand(s => KeepFL =true, new[] { "--keep-fl" }, "When Exporting FL the FL Scripts are not Deleted"));
-            runner._AddCommand(new SetDataCommand(s => ExportFL=true, new[] { "--export-fl", "-export" }, "Export FL Scripts to FLC before packing"));
-            runner._AddCommand(new SetDataCommand(s => PackageName = s.First(), new[] { "--name", "-n" }, "Set Package Name"));
-            runner._AddCommand(new SetDataCommand(s => UnpackConfig = s.First(), new[] { "--unpack-config", "-u" }, "Set Unpack Config"));
+            runner._AddCommand(
+                               new SetDataCommand(
+                                                  s => ExtraSteps = s,
+                                                  new[] { "--extra-steps", "-e" },
+                                                  "Set Extra Serialization Steps"
+                                                 )
+                              );
+            runner._AddCommand(
+                               new SetDataCommand(
+                                                  s => KeepFL = true,
+                                                  new[] { "--keep-fl" },
+                                                  "When Exporting FL the FL Scripts are not Deleted"
+                                                 )
+                              );
+            runner._AddCommand(
+                               new SetDataCommand(
+                                                  s => ExportFL = true,
+                                                  new[] { "--export-fl", "-export" },
+                                                  "Export FL Scripts to FLC before packing"
+                                                 )
+                              );
+            runner._AddCommand(
+                               new SetDataCommand(
+                                                  s => PackageName = s.First(),
+                                                  new[] { "--name", "-n" },
+                                                  "Set Package Name"
+                                                 )
+                              );
+            runner._AddCommand(
+                               new SetDataCommand(
+                                                  s => UnpackConfig = s.First(),
+                                                  new[] { "--unpack-config", "-u" },
+                                                  "Set Unpack Config"
+                                                 )
+                              );
         }
 
 
@@ -44,7 +75,6 @@ namespace OpenFL.Commandline.Core.Systems
             Directory.SetCurrentDirectory(input);
             if (ExportFL)
             {
-
                 string dir = Path.Combine(
                                           oldDir,
                                           "temp_" +
@@ -89,8 +119,6 @@ namespace OpenFL.Commandline.Core.Systems
                                   );
 
             FLData.SetProgress($"[{Name}]", "Cleaning Up.", 1, currentProgress, maxProgress);
-
-
         }
 
         private void CopyDirectory(string source, string target)

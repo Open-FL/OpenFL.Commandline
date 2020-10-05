@@ -15,11 +15,11 @@ namespace OpenFL.Commandline.Core.Systems
 {
     public class FLRunSystem : FLCommandlineSystem
     {
-        
+
         private string[] Defines = new string[0];
         private int ResolutionX = 256;
-        private int ResolutionY = 256;
-        
+        private readonly int ResolutionY = 256;
+
         private bool WarmBuffers;
 
 
@@ -33,7 +33,6 @@ namespace OpenFL.Commandline.Core.Systems
 
         protected override void Run(string input, string output)
         {
-
             FLBuffer buffer = FLData.Container.CreateBuffer(ResolutionX, ResolutionY, 1, "Input");
             SerializableFLProgram prog;
             if (Path.GetExtension(input) == "flc")
@@ -46,6 +45,7 @@ namespace OpenFL.Commandline.Core.Systems
                 FLData.Log($"[{Name}]", "Parsing", 2);
                 prog = Parse(input, Defines);
             }
+
             FLData.Log($"[{Name}]", "Building", 2);
             FLProgram program = prog.Initialize(FLData.Container);
 
@@ -64,7 +64,7 @@ namespace OpenFL.Commandline.Core.Systems
             {
                 FLData.Log($"[{Name}]", "No Entry Point Found. Skipping", 2);
             }
-            
+
             program.FreeResources();
             buffer.Dispose();
         }
@@ -73,25 +73,43 @@ namespace OpenFL.Commandline.Core.Systems
         protected override void AddCommands(Runner runner)
         {
             runner._AddCommand(new SetDataCommand(s => Defines = s, new[] { "--defines", "-d" }, "Set Define Tags"));
-            runner._AddCommand(new SetDataCommand(s => WarmBuffers = true, new[] { "--warm", "-w" }, "Warm buffers before running"));
-            runner._AddCommand(new SetDataCommand(s =>
-                                             {
-                                                 if (!int.TryParse(s.First(), out ResolutionX))
-                                                 {
-                                                     throw new InvalidCastException(
-                                                                                    $"Can not Convert {s} into type int"
-                                                                                   );
-                                                 }
-                                             }, new[] { "--x", "-x" }, "Set X Resolution"));
-            runner._AddCommand(new SetDataCommand(s =>
-                                             {
-                                                 if (!int.TryParse(s.First(), out ResolutionX))
-                                                 {
-                                                     throw new InvalidCastException(
-                                                                                    $"Can not Convert {s} into type int"
-                                                                                   );
-                                                 }
-                                             }, new[] { "--y", "-y" }, "Set Y Resolution"));
+            runner._AddCommand(
+                               new SetDataCommand(
+                                                  s => WarmBuffers = true,
+                                                  new[] { "--warm", "-w" },
+                                                  "Warm buffers before running"
+                                                 )
+                              );
+            runner._AddCommand(
+                               new SetDataCommand(
+                                                  s =>
+                                                  {
+                                                      if (!int.TryParse(s.First(), out ResolutionX))
+                                                      {
+                                                          throw new InvalidCastException(
+                                                               $"Can not Convert {s} into type int"
+                                                              );
+                                                      }
+                                                  },
+                                                  new[] { "--x", "-x" },
+                                                  "Set X Resolution"
+                                                 )
+                              );
+            runner._AddCommand(
+                               new SetDataCommand(
+                                                  s =>
+                                                  {
+                                                      if (!int.TryParse(s.First(), out ResolutionX))
+                                                      {
+                                                          throw new InvalidCastException(
+                                                               $"Can not Convert {s} into type int"
+                                                              );
+                                                      }
+                                                  },
+                                                  new[] { "--y", "-y" },
+                                                  "Set Y Resolution"
+                                                 )
+                              );
         }
 
     }

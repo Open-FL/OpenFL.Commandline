@@ -9,9 +9,9 @@ namespace OpenFL.Commandline.Core.Systems
 
         public override string Name => "unpacker";
 
-        public override string[] SupportedInputExtensions =>new [] { "flres" };
+        public override string[] SupportedInputExtensions => new[] { "flres" };
 
-        public override string[] SupportedOutputExtensions => new []{""};
+        public override string[] SupportedOutputExtensions => new[] { "" };
 
         protected override void Run(string input, string output)
         {

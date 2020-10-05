@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Mime;
 using System.Reflection;
 
 using CommandlineSystem;
@@ -22,24 +21,55 @@ namespace OpenFL.Commandline.Core.Systems
     public class AssemblyBrowser : ICommandlineSystem
     {
 
-        public string Name => "asm-browser";
-
-        private int Verbosity=4;
-        private string[] Unpack;
-        private string[] List;
         private string[] FileList;
         private string[] FileUnpack;
+        private string[] List;
+        private string[] Unpack;
+
+        private int Verbosity = 4;
+
+        public string Name => "asm-browser";
 
         public void Run(string[] args)
         {
             CommandRunnerDebugConfig.Settings.MinSeverity = Utility.ADL.Verbosity.Level3;
             Runner r = new Runner();
-            r._AddCommand(new SetDataCommand(strings => Verbosity = int.Parse(strings.First()), new[] { "--verbosity", "-v" }, "The Verbosity Level (lower = less logs)"));
+            r._AddCommand(
+                          new SetDataCommand(
+                                             strings => Verbosity = int.Parse(strings.First()),
+                                             new[] { "--verbosity", "-v" },
+                                             "The Verbosity Level (lower = less logs)"
+                                            )
+                         );
             r._AddCommand(new DefaultHelpCommand(true));
-            r._AddCommand(new SetDataCommand(strings => Unpack = strings, new[] { "--unpack", "-unpack" }, "Unpacks a plugins assembly data by name"));
-            r._AddCommand(new SetDataCommand(strings => List = strings, new[] { "--list", "-list" }, "Lists All loaded files or All files inside an assembly if arguments are passed"));
-            r._AddCommand(new SetDataCommand(strings => FileUnpack = strings, new[] { "--unpack-file", "-unpack-file" }, "Unpacks a plugins assembly data by file"));
-            r._AddCommand(new SetDataCommand(strings => FileList = strings, new[] { "--list-file", "-list-file" }, "Lists All loaded files or All files inside an assembly if arguments are passed"));
+            r._AddCommand(
+                          new SetDataCommand(
+                                             strings => Unpack = strings,
+                                             new[] { "--unpack", "-unpack" },
+                                             "Unpacks a plugins assembly data by name"
+                                            )
+                         );
+            r._AddCommand(
+                          new SetDataCommand(
+                                             strings => List = strings,
+                                             new[] { "--list", "-list" },
+                                             "Lists All loaded files or All files inside an assembly if arguments are passed"
+                                            )
+                         );
+            r._AddCommand(
+                          new SetDataCommand(
+                                             strings => FileUnpack = strings,
+                                             new[] { "--unpack-file", "-unpack-file" },
+                                             "Unpacks a plugins assembly data by file"
+                                            )
+                         );
+            r._AddCommand(
+                          new SetDataCommand(
+                                             strings => FileList = strings,
+                                             new[] { "--list-file", "-list-file" },
+                                             "Lists All loaded files or All files inside an assembly if arguments are passed"
+                                            )
+                         );
 
             FLData.InitializePluginSystemOnly(true, Verbosity);
 
@@ -48,7 +78,7 @@ namespace OpenFL.Commandline.Core.Systems
             IEnumerable<BasePluginPointer> global =
                 ListHelper.LoadList(PluginPaths.GlobalPluginListFile).Select(x => new BasePluginPointer(x));
 
-            Run((y) => global.FirstOrDefault(x => x.PluginName == y)?.PluginFile, Unpack, List);
+            Run(y => global.FirstOrDefault(x => x.PluginName == y)?.PluginFile, Unpack, List);
 
             Run(Path.GetFullPath, FileUnpack, FileList);
         }
@@ -59,11 +89,12 @@ namespace OpenFL.Commandline.Core.Systems
             {
                 if (unpack.Length == 0)
                 {
-                    Console.WriteLine("Invalid Unpack Argument Count.\nExpected: <plugin-name> or <plugin-name> <folder1> <folder2> ...");
+                    Console.WriteLine(
+                                      "Invalid Unpack Argument Count.\nExpected: <plugin-name> or <plugin-name> <folder1> <folder2> ..."
+                                     );
                 }
                 else
                 {
-
                     string ptr = assemblyFileResolve(unpack[0]);
                     if (ptr == null)
                     {
@@ -80,8 +111,6 @@ namespace OpenFL.Commandline.Core.Systems
 
                         string[] files = ManifestReader.AllFilesFromAssembly(asm);
                         UnpackResources(files);
-
-
                     }
                     else if (unpack.Length > 1) //Folders from a specific plugin
                     {
@@ -92,7 +121,8 @@ namespace OpenFL.Commandline.Core.Systems
                             Console.WriteLine("Can not Load Plugin: " + ptr);
                         }
 
-                        IEnumerable<string> files = ManifestReader.AllFilesFromAssembly(asm).Where(x => unpack.Skip(1).Any(x.StartsWith));
+                        IEnumerable<string> files = ManifestReader.AllFilesFromAssembly(asm)
+                                                                  .Where(x => unpack.Skip(1).Any(x.StartsWith));
                         UnpackResources(files);
                     }
                 }
@@ -118,6 +148,7 @@ namespace OpenFL.Commandline.Core.Systems
                         files = ManifestReader.AllFilesFromAssembly(asm).Where(x => list.Skip(1).Any(x.StartsWith));
                     }
                 }
+
                 Console.WriteLine("Listing Assembly Files:");
 
                 foreach (string file in files)

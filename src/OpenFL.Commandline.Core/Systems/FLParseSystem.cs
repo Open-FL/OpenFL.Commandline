@@ -9,16 +9,17 @@ namespace OpenFL.Commandline.Core.Systems
 {
     public class FLParseSystem : FLCommandlineSystem
     {
-        private string[] Defines= new string[0];
+
+        private string[] Defines = new string[0];
         private string[] ExtraSteps;
 
         private bool NoDialog;
 
         public override string Name => "serialize";
 
-        public override string[] SupportedInputExtensions => new []{ "fl" };
+        public override string[] SupportedInputExtensions => new[] { "fl" };
 
-        public override string[] SupportedOutputExtensions => new []{ "flc" };
+        public override string[] SupportedOutputExtensions => new[] { "flc" };
 
         protected override void Run(string input, string output)
         {
@@ -34,7 +35,14 @@ namespace OpenFL.Commandline.Core.Systems
         protected override void AddCommands(Runner runner)
         {
             runner._AddCommand(new SetDataCommand(s => Defines = s, new[] { "--defines", "-d" }, "Set Define Tags"));
-            runner._AddCommand(new SetDataCommand(s => ExtraSteps = s, new[] { "--extra-steps", "-e" }, "Set Extra Serialization Steps"));
+            runner._AddCommand(
+                               new SetDataCommand(
+                                                  s => ExtraSteps = s,
+                                                  new[] { "--extra-steps", "-e" },
+                                                  "Set Extra Serialization Steps"
+                                                 )
+                              );
         }
+
     }
 }

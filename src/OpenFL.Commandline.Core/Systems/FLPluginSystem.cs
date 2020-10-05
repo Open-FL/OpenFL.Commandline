@@ -13,23 +13,42 @@ namespace OpenFL.Commandline.Core.Systems
     public class FLPluginSystem : ICommandlineSystem
     {
 
-        public string Name => "plugins";
         private string[] Adds = new string[0];
         private string[] Removes = new string[0];
         private int Verbosity = 2;
+
+        public string Name => "plugins";
 
         public void Run(string[] args)
         {
             ProjectDebugConfig.OnConfigCreate += ProjectDebugConfig_OnConfigCreate;
             Runner r = new Runner();
-            r._AddCommand(new SetDataCommand(strings => Adds = strings, new[] { "--add", "-a" }, "Adds a Plugin package"));
-            r._AddCommand(new SetDataCommand(strings => Removes = strings, new[] { "--remove", "-r" }, "Removes a Plugin package"));
-            r._AddCommand(new SetDataCommand(strings => Verbosity = int.Parse(strings.First()), new[] { "--verbosity", "-v" }, "The Verbosity Level (lower = less logs)"));
+            r._AddCommand(
+                          new SetDataCommand(
+                                             strings => Adds = strings,
+                                             new[] { "--add", "-a" },
+                                             "Adds a Plugin package"
+                                            )
+                         );
+            r._AddCommand(
+                          new SetDataCommand(
+                                             strings => Removes = strings,
+                                             new[] { "--remove", "-r" },
+                                             "Removes a Plugin package"
+                                            )
+                         );
+            r._AddCommand(
+                          new SetDataCommand(
+                                             strings => Verbosity = int.Parse(strings.First()),
+                                             new[] { "--verbosity", "-v" },
+                                             "The Verbosity Level (lower = less logs)"
+                                            )
+                         );
             r._AddCommand(new DefaultHelpCommand(true));
 
             r._RunCommands(args);
 
-            FLData.InitializePluginSystemOnly(true,Verbosity);
+            FLData.InitializePluginSystemOnly(true, Verbosity);
 
             foreach (string remove in Removes)
             {
@@ -48,5 +67,6 @@ namespace OpenFL.Commandline.Core.Systems
         {
             obj.MinSeverity = Verbosity;
         }
+
     }
 }
