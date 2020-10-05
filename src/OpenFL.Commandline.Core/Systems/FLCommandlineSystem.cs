@@ -49,7 +49,7 @@ namespace OpenFL.Commandline.Core.Systems
             r._AddCommand(
                           new SetDataCommand(
                                              s => NoDialog = true,
-                                             new[] { "--yes", "-y" },
+                                             new[] { "--yes" },
                                              "Answer all dialogs with Yes"
                                             )
                          );
