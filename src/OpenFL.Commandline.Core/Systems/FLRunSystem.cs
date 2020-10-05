@@ -16,11 +16,11 @@ namespace OpenFL.Commandline.Core.Systems
     public class FLRunSystem : FLCommandlineSystem
     {
 
-        private string[] Defines = new string[0];
-        private int ResolutionX = 256;
-        private readonly int ResolutionY = 256;
+        private string[] defines = new string[0];
+        private int resolutionX = 256;
+        private int resolutionY = 256;
 
-        private bool WarmBuffers;
+        private bool warmBuffers;
 
 
         public override bool ExpandInputDirectories => true;
@@ -33,7 +33,7 @@ namespace OpenFL.Commandline.Core.Systems
 
         protected override void Run(string input, string output)
         {
-            FLBuffer buffer = FLData.Container.CreateBuffer(ResolutionX, ResolutionY, 1, "Input");
+            FLBuffer buffer = FLData.Container.CreateBuffer(resolutionX, resolutionY, 1, "Input");
             SerializableFLProgram prog;
             if (Path.GetExtension(input) == "flc")
             {
@@ -43,7 +43,7 @@ namespace OpenFL.Commandline.Core.Systems
             else
             {
                 FLData.Log($"[{Name}]", "Parsing", 2);
-                prog = Parse(input, Defines);
+                prog = Parse(input, defines);
             }
 
             FLData.Log($"[{Name}]", "Building", 2);
@@ -53,7 +53,7 @@ namespace OpenFL.Commandline.Core.Systems
             try
             {
                 FLData.Log($"[{Name}]", "Running", 2);
-                program.Run(buffer, false, null, WarmBuffers);
+                program.Run(buffer, false, null, warmBuffers);
 
                 FLData.Log($"[{Name}]", "Saving", 2);
                 Bitmap bmp = program.GetActiveBitmap();
@@ -72,10 +72,10 @@ namespace OpenFL.Commandline.Core.Systems
 
         protected override void AddCommands(Runner runner)
         {
-            runner._AddCommand(new SetDataCommand(s => Defines = s, new[] { "--defines", "-d" }, "Set Define Tags"));
+            runner._AddCommand(new SetDataCommand(s => defines = s, new[] { "--defines", "-d" }, "Set Define Tags"));
             runner._AddCommand(
                                new SetDataCommand(
-                                                  s => WarmBuffers = true,
+                                                  s => warmBuffers = true,
                                                   new[] { "--warm", "-w" },
                                                   "Warm buffers before running"
                                                  )
@@ -84,7 +84,7 @@ namespace OpenFL.Commandline.Core.Systems
                                new SetDataCommand(
                                                   s =>
                                                   {
-                                                      if (!int.TryParse(s.First(), out ResolutionX))
+                                                      if (!int.TryParse(s.First(), out resolutionX))
                                                       {
                                                           throw new InvalidCastException(
                                                                $"Can not Convert {s} into type int"
@@ -99,7 +99,7 @@ namespace OpenFL.Commandline.Core.Systems
                                new SetDataCommand(
                                                   s =>
                                                   {
-                                                      if (!int.TryParse(s.First(), out ResolutionX))
+                                                      if (!int.TryParse(s.First(), out resolutionY))
                                                       {
                                                           throw new InvalidCastException(
                                                                $"Can not Convert {s} into type int"
