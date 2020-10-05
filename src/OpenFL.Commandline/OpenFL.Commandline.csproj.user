@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>asm-browser -list-file D:\Repository\OpenFL.Commandline\src\OpenFL.Commandline\bin\Debug\data\plugins\fl-editor-examples\bin\OpenFL.Examples.dll</StartArguments>
+    <StartArguments>run -i .\examples -checks all</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <StartArguments>repo -default -all -v 10</StartArguments>

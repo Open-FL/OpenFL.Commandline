@@ -13,8 +13,6 @@ namespace OpenFL.Commandline.Core.Systems
         private string[] Defines = new string[0];
         private string[] ExtraSteps;
 
-        private bool NoDialog;
-
         public override string Name => "serialize";
 
         public override string[] SupportedInputExtensions => new[] { "fl" };

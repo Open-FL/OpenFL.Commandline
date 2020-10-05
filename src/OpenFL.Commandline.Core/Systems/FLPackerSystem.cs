@@ -139,7 +139,7 @@ namespace OpenFL.Commandline.Core.Systems
                     Directory.CreateDirectory(Path.GetDirectoryName(dstFile));
                     File.Copy(file, dstFile);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                 }
             }

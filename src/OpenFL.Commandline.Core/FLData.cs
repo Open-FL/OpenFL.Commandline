@@ -9,6 +9,7 @@ using OpenCL.Wrapper.TypeEnums;
 using OpenFL.Core;
 using OpenFL.Core.Buffers.BufferCreators;
 using OpenFL.Core.Instructions.InstructionCreators;
+using OpenFL.Core.ProgramChecks;
 using OpenFL.Parsing;
 
 using PluginSystem.Core;
@@ -31,7 +32,7 @@ namespace OpenFL.Commandline.Core
         private static readonly PluginHost Host = new PluginHost();
 
         private static readonly ADLLogger<LogType> pluginLogger = new ADLLogger<LogType>(
-             new ProjectDebugConfig("FL", -1, 2, PrefixLookupSettings.AddPrefixIfAvailable)
+             new ProjectDebugConfig("FL-Cmd", -1, PrefixLookupSettings.AddPrefixIfAvailable)
             );
 
         private static bool NoDialogs;
@@ -55,7 +56,7 @@ namespace OpenFL.Commandline.Core
             InitializePluginSystem();
         }
 
-        public static void InitializeFL(bool noDialogs, int verbosity)
+        public static void InitializeFL(bool noDialogs, int verbosity, FLProgramCheckType checkType)
         {
             NoDialogs = noDialogs;
             int maxTasks = 6;
@@ -79,6 +80,9 @@ namespace OpenFL.Commandline.Core
 
             SetProgress("[Setup]", "Initializing FL", 1, 5, maxTasks);
             Container = InitializeCLKernels("resources/kernel");
+
+            FLProgramCheckBuilder builder = FLProgramCheckBuilder.CreateDefaultCheckBuilder(Container.InstructionSet, Container.BufferCreator, checkType);
+            Container.SetCheckBuilder(builder);
 
             SetProgress("[Setup]", "Finished", 1, 6, maxTasks);
         }

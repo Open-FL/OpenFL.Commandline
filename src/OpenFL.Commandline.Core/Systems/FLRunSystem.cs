@@ -60,7 +60,7 @@ namespace OpenFL.Commandline.Core.Systems
                 bmp.Save(output);
                 bmp.Dispose();
             }
-            catch (FLInvalidEntryPointException e)
+            catch (FLInvalidEntryPointException)
             {
                 FLData.Log($"[{Name}]", "No Entry Point Found. Skipping", 2);
             }

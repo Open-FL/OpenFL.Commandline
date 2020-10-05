@@ -7,11 +7,14 @@ using CommandlineSystem;
 
 using OpenFL.Core.DataObjects.SerializableDataObjects;
 using OpenFL.Core.Parsing.StageResults;
+using OpenFL.Core.ProgramChecks;
 using OpenFL.Serialization;
 
 using Utility.ADL.Configs;
 using Utility.CommandRunner;
 using Utility.CommandRunner.BuiltInCommands;
+using Utility.FastString;
+using Utility.ObjectPipeline;
 
 namespace OpenFL.Commandline.Core.Systems
 {
@@ -24,6 +27,8 @@ namespace OpenFL.Commandline.Core.Systems
         private string[] Output = new string[0];
 
         private int Verbosity = 1;
+
+        private FLProgramCheckType CheckTypes = FLProgramCheckType.InputValidation;
 
 
         public virtual bool ExpandInputDirectories => false;
@@ -55,11 +60,18 @@ namespace OpenFL.Commandline.Core.Systems
                                              "The Verbosity Level (lower = less logs)"
                                             )
                          );
+            r._AddCommand(
+                          new SetDataCommand(
+                                             strings => CheckTypes = (FLProgramCheckType)Enum.Parse(typeof(FLProgramCheckType), strings.First(), true),
+                                             new[] { "--checks", "-checks" },
+                                             $"Program Check Profile. (Available: {Enum.GetNames(typeof(FLProgramCheckType)).Unpack(", ")})"
+                                            )
+                         );
             r._AddCommand(new DefaultHelpCommand(true));
             AddCommands(r);
             r._RunCommands(args);
 
-            FLData.InitializeFL(NoDialog, Verbosity);
+            FLData.InitializeFL(NoDialog, Verbosity, CheckTypes);
 
             BeforeRun();
 
@@ -133,6 +145,13 @@ namespace OpenFL.Commandline.Core.Systems
 
         protected SerializableFLProgram Parse(string input, string[] defines)
         {
+            if (FLData.Container.CheckBuilder != null && !FLData.Container.CheckBuilder.IsAttached)
+            {
+                if (!FLData.Container.CheckBuilder.Attach(FLData.Container.Parser, true))
+                {
+                    throw new PipelineNotValidException(FLData.Container.Parser, "Check builder contains invalid Checks.");
+                }
+            }
             return FLData.Container.Parser.Process(new FLParserInput(input, true, defines));
         }
 
