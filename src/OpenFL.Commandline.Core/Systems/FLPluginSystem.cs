@@ -4,6 +4,7 @@ using CommandlineSystem;
 
 using PluginSystem.StartupActions;
 
+using Utility.ADL;
 using Utility.ADL.Configs;
 using Utility.CommandRunner;
 using Utility.CommandRunner.BuiltInCommands;
@@ -21,7 +22,7 @@ namespace OpenFL.Commandline.Core.Systems
 
         public void Run(string[] args)
         {
-            ProjectDebugConfig.OnConfigCreate += ProjectDebugConfig_OnConfigCreate;
+            Debug.OnConfigCreate += ProjectDebugConfig_OnConfigCreate;
             Runner r = new Runner();
             r._AddCommand(
                           new SetDataCommand(
@@ -48,7 +49,7 @@ namespace OpenFL.Commandline.Core.Systems
 
             r._RunCommands(args);
 
-            FLData.InitializePluginSystemOnly(true, Verbosity);
+            FLData.InitializePluginSystemOnly(true);
 
             foreach (string remove in Removes)
             {
@@ -60,12 +61,12 @@ namespace OpenFL.Commandline.Core.Systems
                 ActionRunner.AddActionToStartup($"{ActionRunner.ADD_ACTIVATE_PACKAGE_ACTION} {adds}");
             }
 
-            ProjectDebugConfig.OnConfigCreate -= ProjectDebugConfig_OnConfigCreate;
+            Debug.OnConfigCreate -= ProjectDebugConfig_OnConfigCreate;
         }
 
-        private void ProjectDebugConfig_OnConfigCreate(ProjectDebugConfig obj)
+        private void ProjectDebugConfig_OnConfigCreate(IProjectDebugConfig obj)
         {
-            obj.MinSeverity = Verbosity;
+            obj.SetMinSeverity(Verbosity);
         }
 
     }

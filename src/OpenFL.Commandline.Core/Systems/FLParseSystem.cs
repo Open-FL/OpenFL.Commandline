@@ -3,6 +3,7 @@
 using OpenFL.Core.DataObjects.SerializableDataObjects;
 using OpenFL.Serialization;
 
+using Utility.ADL;
 using Utility.CommandRunner;
 
 namespace OpenFL.Commandline.Core.Systems
@@ -21,9 +22,9 @@ namespace OpenFL.Commandline.Core.Systems
 
         protected override void Run(string input, string output)
         {
-            FLData.Log($"[{Name}]", "Parsing", 2);
+            Logger.Log(LogType.Log, "Parsing", 2);
             SerializableFLProgram prog = Parse(input, Defines);
-            FLData.Log($"[{Name}]", "Serializing", 2);
+            Logger.Log(LogType.Log, "Serializing", 2);
             using (Stream s = File.Create(output))
             {
                 FLSerializer.SaveProgram(s, prog, FLData.Container.InstructionSet, ExtraSteps);

@@ -9,6 +9,7 @@ using OpenFL.Core.DataObjects.ExecutableDataObjects;
 using OpenFL.Core.DataObjects.SerializableDataObjects;
 using OpenFL.Core.Exceptions;
 
+using Utility.ADL;
 using Utility.CommandRunner;
 
 namespace OpenFL.Commandline.Core.Systems
@@ -37,32 +38,32 @@ namespace OpenFL.Commandline.Core.Systems
             SerializableFLProgram prog;
             if (Path.GetExtension(input) == "flc")
             {
-                FLData.Log($"[{Name}]", "Loading", 2);
+                Logger.Log(LogType.Log, "Loading", 2);
                 prog = Load(input);
             }
             else
             {
-                FLData.Log($"[{Name}]", "Parsing", 2);
+                Logger.Log(LogType.Log, "Parsing", 2);
                 prog = Parse(input, defines);
             }
 
-            FLData.Log($"[{Name}]", "Building", 2);
+            Logger.Log(LogType.Log, "Building", 2);
             FLProgram program = prog.Initialize(FLData.Container);
 
 
             try
             {
-                FLData.Log($"[{Name}]", "Running", 2);
+                Logger.Log(LogType.Log, "Running", 2);
                 program.Run(buffer, false, null, warmBuffers);
 
-                FLData.Log($"[{Name}]", "Saving", 2);
+                Logger.Log(LogType.Log, "Saving", 2);
                 Bitmap bmp = program.GetActiveBitmap();
                 bmp.Save(output);
                 bmp.Dispose();
             }
             catch (FLInvalidEntryPointException)
             {
-                FLData.Log($"[{Name}]", "No Entry Point Found. Skipping", 2);
+                Logger.Log(LogType.Log, "No Entry Point Found. Skipping", 2);
             }
 
             program.FreeResources();

@@ -13,6 +13,7 @@ using PluginSystem.Repository;
 using PluginSystem.StartupActions;
 using PluginSystem.Utility;
 
+using Utility.ADL;
 using Utility.ADL.Configs;
 using Utility.CommandRunner;
 using Utility.CommandRunner.BuiltInCommands;
@@ -42,7 +43,7 @@ namespace OpenFL.Commandline.Core.Systems
 
         public void Run(string[] args)
         {
-            ProjectDebugConfig.OnConfigCreate += ProjectDebugConfig_OnConfigCreate;
+            Debug.OnConfigCreate += ProjectDebugConfig_OnConfigCreate;
 
             Runner r = new Runner();
 
@@ -126,7 +127,7 @@ namespace OpenFL.Commandline.Core.Systems
                          );
 
 
-            FLData.InitializePluginSystemOnly(true, Verbosity);
+            FLData.InitializePluginSystemOnly(true);
 
 
             r._RunCommands(args);
@@ -227,12 +228,12 @@ namespace OpenFL.Commandline.Core.Systems
             }
 
 
-            ProjectDebugConfig.OnConfigCreate += ProjectDebugConfig_OnConfigCreate;
+            Debug.OnConfigCreate += ProjectDebugConfig_OnConfigCreate;
         }
 
-        private void ProjectDebugConfig_OnConfigCreate(ProjectDebugConfig obj)
+        private void ProjectDebugConfig_OnConfigCreate(IProjectDebugConfig obj)
         {
-            obj.MinSeverity = Verbosity;
+            obj.SetMinSeverity(Verbosity);
         }
 
         private string GetPackage(List<Repository> repos, string name)

@@ -71,7 +71,7 @@ namespace OpenFL.Commandline.Core.Systems
                                             )
                          );
 
-            FLData.InitializePluginSystemOnly(true, Verbosity);
+            FLData.InitializePluginSystemOnly(true);
 
             r._RunCommands(args);
 

@@ -31,9 +31,8 @@ namespace OpenFL.Commandline.Core
 
         private static readonly PluginHost Host = new PluginHost();
 
-        private static readonly ADLLogger<LogType> pluginLogger = new ADLLogger<LogType>(
-             new ProjectDebugConfig("FL-Cmd", -1, PrefixLookupSettings.AddPrefixIfAvailable)
-            );
+        private static readonly ADLLogger<LogType> Logger = new ADLLogger<LogType>(OpenFLDebugConfig.Settings, "CLI");
+            
 
         private static bool NoDialogs;
 
@@ -41,50 +40,49 @@ namespace OpenFL.Commandline.Core
 
         public static event Action CustomStartupActions;
 
-        public static void InitializePluginSystemOnly(bool noDialogs, int verbosity)
+        public static void InitializePluginSystemOnly(bool noDialogs)
         {
             NoDialogs = noDialogs;
             int maxTasks = 3;
 
-            SetProgress("[Setup]", "Initializing Logging System", 1, 1, maxTasks);
-            InitializeLogging((Verbosity) verbosity);
+            SetProgress("Initializing Logging System", 0, 1, maxTasks);
 
-            SetProgress("[Setup]", "Initializing Resource System", 1, 2, maxTasks);
+            SetProgress("Initializing Resource System", 0, 2, maxTasks);
             InitializeResourceSystem();
 
-            SetProgress("[Setup]", "Initializing Plugin System", 1, 3, maxTasks);
+            SetProgress("Initializing Plugin System", 0, 3, maxTasks);
             InitializePluginSystem();
         }
 
-        public static void InitializeFL(bool noDialogs, int verbosity, FLProgramCheckType checkType)
+        public static void InitializeFL(bool noDialogs, FLProgramCheckType checkType)
         {
             NoDialogs = noDialogs;
             int maxTasks = 6;
 
-            Log("[Setup]", "Initializing FS", 1);
+            Logger.Log(LogType.Log,"Initializing FS", 1);
             PrepareFileSystem();
 
-            SetProgress("[Setup]", "Initializing Logging System", 1, 1, maxTasks);
-            InitializeLogging((Verbosity) verbosity);
+            SetProgress("Initializing Logging System", 0, 1, maxTasks);
+            Debug.DefaultInitialization();
 
-            SetProgress("[Setup]", "Initializing Resource System", 1, 2, maxTasks);
+            SetProgress("Initializing Resource System", 0, 2, maxTasks);
             InitializeResourceSystem();
 
-            SetProgress("[Setup]", "Initializing Plugin System", 1, 3, maxTasks);
+            SetProgress("Initializing Plugin System", 0, 3, maxTasks);
             InitializePluginSystem();
 
             PluginManager.LoadPlugins(Host);
 
-            SetProgress("[Setup]", "Running Custom Actions", 1, 4, maxTasks);
+            SetProgress("Running Custom Actions", 0, 4, maxTasks);
             CustomStartupActions?.Invoke();
 
-            SetProgress("[Setup]", "Initializing FL", 1, 5, maxTasks);
+            SetProgress("Initializing FL", 0, 5, maxTasks);
             Container = InitializeCLKernels("resources/kernel");
 
             FLProgramCheckBuilder builder = FLProgramCheckBuilder.CreateDefaultCheckBuilder(Container.InstructionSet, Container.BufferCreator, checkType);
             Container.SetCheckBuilder(builder);
 
-            SetProgress("[Setup]", "Finished", 1, 6, maxTasks);
+            SetProgress("Finished", 0, 6, maxTasks);
         }
 
         private static void PrepareFileSystem()
@@ -92,10 +90,10 @@ namespace OpenFL.Commandline.Core
             Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
         }
 
-        public static void Log(string tag, string message, int severity)
-        {
-            pluginLogger.Log(LogType.Log, $"{tag}{message}", severity);
-        }
+        //public static void Log(string message, int severity)
+        //{
+        //    pluginLogger.Log(LogType.Log, message, severity);
+        //}
 
         public static bool ShowDialog(string tag, string title, string message)
         {
@@ -104,21 +102,10 @@ namespace OpenFL.Commandline.Core
                 return true;
             }
 
-            Log($"{tag}[DIALOG]", $"{title} :\n\t{message} [Y/n]", 0);
+            Logger.Log(LogType.Log, $"{title} :\n\t{message} [Y/n]", 0);
             Console.Write(">");
             string s = Console.ReadLine();
             return s.ToLower() != "n";
-        }
-
-        private static void InitializeLogging(Verbosity verbosity)
-        {
-            OpenCLDebugConfig.Settings.MinSeverity = verbosity;
-            OpenFLDebugConfig.Settings.MinSeverity = verbosity;
-            InternalADLProjectDebugConfig.Settings.MinSeverity = verbosity;
-            ManifestIODebugConfig.Settings.MinSeverity = verbosity;
-            ExtPPDebugConfig.Settings.MinSeverity = verbosity;
-
-            Debug.DefaultInitialization();
         }
 
         private static void InitializeResourceSystem()
@@ -131,20 +118,20 @@ namespace OpenFL.Commandline.Core
             EmbeddedFileIOManager.Initialize();
         }
 
-        public static void SetProgress(string tag, string status, int severity, int current, int max)
+        public static void SetProgress(string status, int severity, int current, int max)
         {
-            Log($"{tag}[Progress][{current}/{max}]", status, severity);
+            Logger.Log(LogType.Log, $"[{current}/{max}] {status}", severity);
         }
 
         private static void InitializePluginSystem()
         {
-            PluginManager.SetLogEventHandler(args => Log("[PM]", args.Message, 2));
+            PluginManager.SetLogEventHandler(args => Logger.Log(LogType.Log, args.Message, 2));
             PluginManager.Initialize(
                                      Path.Combine(PluginPaths.EntryDirectory, "data"),
                                      "internal",
                                      "plugins",
                                      (title, msg) => ShowDialog("[PM]", title, msg),
-                                     (status, current, max) => SetProgress("[PM]", status, 1, current, max),
+                                     (status, current, max) => SetProgress(status, 1, current, max),
                                      Path.Combine(PluginPaths.EntryDirectory, "static-data.sd")
                                     );
         }
@@ -153,14 +140,14 @@ namespace OpenFL.Commandline.Core
         {
             {
                 CLAPI instance = CLAPI.GetInstance();
-                Log("[CL-KERNELS]", "Discovering Files in Path: " + kernelPath, 1);
+                Logger.Log(LogType.Log, "Discovering Files in Path: " + kernelPath, 1);
                 string[] files = IOManager.DirectoryExists(kernelPath)
                                      ? IOManager.GetFiles(kernelPath, "*.cl")
                                      : new string[0];
 
                 if (files.Length == 0)
                 {
-                    Log("[CL-KERNELS]", "Error: No Files found at path: " + kernelPath, 1);
+                    Logger.Log(LogType.Error, "Error: No Files found at path: " + kernelPath, 1);
                 }
 
                 KernelDatabase dataBase = new KernelDatabase(DataVectorTypes.Uchar1);
@@ -171,8 +158,7 @@ namespace OpenFL.Commandline.Core
 
                 foreach (string file in files)
                 {
-                    Log(
-                        "[CL-KERNELS]",
+                    Logger.Log(LogType.Log,
                         $"[{fileCount}/{files.Length}]Loading: {file} ({kernelCount})",
                         2
                        );
@@ -185,14 +171,14 @@ namespace OpenFL.Commandline.Core
                     }
                     catch (Exception e)
                     {
-                        Log("[CL-KERNELS]", "ERROR: " + e.Message, 2);
+                        Logger.Log(LogType.Error, "ERROR: " + e.Message, 2);
                     }
 
                     fileCount++;
                 }
 
 
-                Log("[CL-KERNELS]", "Kernels Loaded: " + kernelCount, 1);
+                Logger.Log(LogType.Log, "Kernels Loaded: " + kernelCount, 1);
 
 
                 FLInstructionSet iset = FLInstructionSet.CreateWithBuiltInTypes(dataBase);

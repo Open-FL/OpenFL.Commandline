@@ -5,11 +5,13 @@ using System.Linq;
 
 using CommandlineSystem;
 
+using OpenFL.Core;
 using OpenFL.Core.DataObjects.SerializableDataObjects;
 using OpenFL.Core.Parsing.StageResults;
 using OpenFL.Core.ProgramChecks;
 using OpenFL.Serialization;
 
+using Utility.ADL;
 using Utility.ADL.Configs;
 using Utility.CommandRunner;
 using Utility.CommandRunner.BuiltInCommands;
@@ -18,7 +20,7 @@ using Utility.ObjectPipeline;
 
 namespace OpenFL.Commandline.Core.Systems
 {
-    public abstract class FLCommandlineSystem : ICommandlineSystem
+    public abstract class FLCommandlineSystem : ALoggable<LogType>, ICommandlineSystem
     {
 
         private string[] Input = new string[0];
@@ -39,9 +41,14 @@ namespace OpenFL.Commandline.Core.Systems
 
         public abstract string Name { get; }
 
+        protected FLCommandlineSystem() : base(OpenFLDebugConfig.Settings)
+        {
+            Logger.SetSubProjectName(Name);
+        }
+
         public void Run(string[] args)
         {
-            ProjectDebugConfig.OnConfigCreate += ProjectDebugConfig_OnConfigCreate;
+            Debug.OnConfigCreate += ProjectDebugConfig_OnConfigCreate;
 
             Runner r = new Runner();
             r._AddCommand(new SetDataCommand(s => Input = s, new[] { "--input", "-i" }, "Set Input Files"));
@@ -70,8 +77,13 @@ namespace OpenFL.Commandline.Core.Systems
             r._AddCommand(new DefaultHelpCommand(true));
             AddCommands(r);
             r._RunCommands(args);
+            foreach (KeyValuePair<IProjectDebugConfig, List<ADLLogger>> keyValuePair in ADLLogger.GetReadOnlyLoggerMap())
+            {
+                keyValuePair.Key.SetMinSeverity(Verbosity);
+            }
+            OpenFLDebugConfig.Settings.SetMinSeverity(Verbosity);
 
-            FLData.InitializeFL(NoDialog, Verbosity, CheckTypes);
+            FLData.InitializeFL(NoDialog, CheckTypes);
 
             BeforeRun();
 
@@ -111,12 +123,10 @@ namespace OpenFL.Commandline.Core.Systems
                                                    SupportedOutputExtensions.First()
                                                   )
                                     : Output[i];
-                FLData.SetProgress(
-                                   $"[{Name}]",
-                                   $"{Path.GetFileName(input)} => {Path.GetFileName(output)}",
-                                   1,
-                                   i,
-                                   input.Length
+                FLData.SetProgress($"{Path.GetFileName(input)} => {Path.GetFileName(output)}",
+                                   0,
+                                   i+1,
+                                   Input.Length
                                   );
                 if (!SupportedOutputExtensions.Select(x => string.IsNullOrEmpty(x) ? "" : "." + x)
                                               .Contains(Path.GetExtension(output)))
@@ -127,12 +137,12 @@ namespace OpenFL.Commandline.Core.Systems
                 Run(input, output);
             }
 
-            ProjectDebugConfig.OnConfigCreate -= ProjectDebugConfig_OnConfigCreate;
+            Debug.OnConfigCreate -= ProjectDebugConfig_OnConfigCreate;
         }
 
-        private void ProjectDebugConfig_OnConfigCreate(ProjectDebugConfig obj)
+        private void ProjectDebugConfig_OnConfigCreate(IProjectDebugConfig obj)
         {
-            obj.MinSeverity = Verbosity;
+            obj.SetMinSeverity(Verbosity);
         }
 
         protected virtual void BeforeRun()
