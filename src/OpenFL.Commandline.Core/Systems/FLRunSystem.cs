@@ -15,6 +15,7 @@ using OpenFL.Core.DataObjects.SerializableDataObjects;
 using OpenFL.Core.Exceptions;
 
 using Utility.ADL;
+using Utility.ADL.Streams;
 using Utility.CommandRunner;
 
 namespace OpenFL.Commandline.Core.Systems
@@ -26,9 +27,13 @@ namespace OpenFL.Commandline.Core.Systems
         private int resolutionX = 256;
         private int resolutionY = 256;
         private bool warmBuffers;
-
-        private ConcurrentQueue<(FLBuffer, CLAPI, string)> saveQueue = new ConcurrentQueue<(FLBuffer, CLAPI, string)>();
-
+        private int useSaveThread;
+        private bool exitRequested;
+        private int totalCount;
+        private int count = 0;
+        private object lockObject = new object();
+        private ConcurrentQueue<(FLBuffer, CLAPI, string, string)> saveQueue = new ConcurrentQueue<(FLBuffer, CLAPI, string, string)>();
+        private Task[] saveThread;
 
         public override bool ExpandInputDirectories => true;
 
@@ -40,7 +45,7 @@ namespace OpenFL.Commandline.Core.Systems
 
         protected override void Run(string input, string output)
         {
-            FLBuffer buffer = FLData.Container.CreateBuffer(resolutionX, resolutionY, 1, "Input", false);
+            FLBuffer buffer = FLData.Container.CreateBuffer(resolutionX, resolutionY, 1, "Input", true);
             SerializableFLProgram prog;
             if (Path.GetExtension(input) == "flc")
             {
@@ -60,13 +65,20 @@ namespace OpenFL.Commandline.Core.Systems
             try
             {
                 Logger.Log(LogType.Log, "Running", 2);
-                program.Run(buffer, false, null, warmBuffers);
-                Bitmap bmp = program.GetActiveBitmap();
-                bmp.Save(output);
-                bmp.Dispose();
-                buffer.Dispose();
+                program.Run(buffer, true, null, warmBuffers);
+                FLBuffer outBuffer = program.GetActiveBuffer(true);
+                if (useSaveThread != 0)
+                {
+                    Interlocked.Increment(ref totalCount);
+                    saveQueue.Enqueue((outBuffer, FLData.Container.Instance, input, output));
+                }
+                else
+                {
+                    Bitmap bmp = program.GetActiveBitmap();
+                    bmp.Save(output);
+                    bmp.Dispose();
+                }
                 program.FreeResources();
-
             }
             catch (FLInvalidEntryPointException)
             {
@@ -75,7 +87,56 @@ namespace OpenFL.Commandline.Core.Systems
 
         }
 
-        
+        protected override void BeforeRun()
+        {
+            base.BeforeRun();
+            if (useSaveThread != 0)
+            {
+                saveThread = new Task[useSaveThread];
+                for (int i = 0; i < useSaveThread; i++)
+                {
+                    int i1 = i;
+                    saveThread[i] = Task.Run(() => SaveThreadLoop(i1));
+                }
+            }
+        }
+
+        protected override void AfterRun()
+        {
+            base.AfterRun();
+            if (useSaveThread != 0)
+            {
+                lock (lockObject) exitRequested = true;
+                Task.WaitAll(saveThread);
+            }
+        }
+
+        private void SaveThreadLoop(int id)
+        {
+            bool exit = false;
+            while (!exit || !saveQueue.IsEmpty)
+            {
+                if (saveQueue.IsEmpty) Thread.Sleep(100);
+                else if (saveQueue.TryDequeue(out (FLBuffer, CLAPI, string, string) result))
+                {
+                    Interlocked.Increment(ref count);
+                    if (result.Item1.Buffer.IsDisposed)
+                    {
+                        Logger.Log(LogType.Error, $"Buffer from file {Path.GetFileName(result.Item3)} is disposed.", 0);
+                        continue;
+                    }
+                    Logger.Log(LogType.Log, $"[W:{id} {count}/{totalCount}]Saving File: {Path.GetFileName(result.Item3)} => {Path.GetFileName(result.Item4)}", 0);
+                    Bitmap bmp = new Bitmap(result.Item1.Width, result.Item1.Height);
+                    CLAPI.UpdateBitmap(result.Item2, bmp, result.Item1.Buffer);
+                    bmp.Save(result.Item4);
+                    bmp.Dispose();
+                    result.Item1.Dispose();
+                }
+
+                lock (lockObject) exit = exitRequested;
+            }
+        }
+
 
         protected override void AddCommands(Runner runner)
         {
@@ -87,6 +148,21 @@ namespace OpenFL.Commandline.Core.Systems
                                                   "Warm buffers before running"
                                                  )
                               );
+            runner._AddCommand(
+                               new SetDataCommand(
+                                                  s =>
+                                                  {
+                                                      if (s.Length == 0 || !int.TryParse(s[0], out useSaveThread))
+                                                      {
+                                                          useSaveThread = 1;
+                                                      }
+                                                  },
+                                                  new[] { "--use-save-thread", "-save-thread" },
+                                                  "Warm buffers before running"
+                                                 )
+                              );
+
+
             runner._AddCommand(
                                new SetDataCommand(
                                                   s =>
