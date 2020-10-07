@@ -25,7 +25,7 @@ namespace OpenFL.Commandline.Core.Systems
         private int resolutionY = 256;
         private object lockObject = new object();
         private bool exitRequested = false;
-
+        private Task saveTask;
         private bool warmBuffers;
 
         private ConcurrentQueue<(FLProgram, FLBuffer, string)> saveQueue = new ConcurrentQueue<(FLProgram, FLBuffer, string)>();
@@ -76,7 +76,7 @@ namespace OpenFL.Commandline.Core.Systems
         protected override void BeforeRun()
         {
             base.BeforeRun();
-            Task saveTask = new Task(SaveThreadLoop);
+            saveTask = new Task(SaveThreadLoop);
             saveTask.Start();
         }
 
@@ -85,6 +85,8 @@ namespace OpenFL.Commandline.Core.Systems
         {
             base.AfterRun();
             lock (lockObject) exitRequested = true;
+
+            Task.WaitAll(saveTask);
         }
 
         private void SaveThreadLoop()
