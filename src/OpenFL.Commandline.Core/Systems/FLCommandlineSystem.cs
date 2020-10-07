@@ -137,6 +137,8 @@ namespace OpenFL.Commandline.Core.Systems
                 Run(input, output);
             }
 
+            AfterRun();
+
             Debug.OnConfigCreate -= ProjectDebugConfig_OnConfigCreate;
         }
 

@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using OpenCL.Wrapper;
+
 using OpenFL.Core;
 using OpenFL.Core.Buffers;
 using OpenFL.Core.DataObjects.ExecutableDataObjects;
@@ -23,12 +25,9 @@ namespace OpenFL.Commandline.Core.Systems
         private string[] defines = new string[0];
         private int resolutionX = 256;
         private int resolutionY = 256;
-        private object lockObject = new object();
-        private bool exitRequested = false;
-        private Task saveTask;
         private bool warmBuffers;
 
-        private ConcurrentQueue<(FLProgram, FLBuffer, string)> saveQueue = new ConcurrentQueue<(FLProgram, FLBuffer, string)>();
+        private ConcurrentQueue<(FLBuffer, CLAPI, string)> saveQueue = new ConcurrentQueue<(FLBuffer, CLAPI, string)>();
 
 
         public override bool ExpandInputDirectories => true;
@@ -41,7 +40,7 @@ namespace OpenFL.Commandline.Core.Systems
 
         protected override void Run(string input, string output)
         {
-            FLBuffer buffer = FLData.Container.CreateBuffer(resolutionX, resolutionY, 1, "Input", true);
+            FLBuffer buffer = FLData.Container.CreateBuffer(resolutionX, resolutionY, 1, "Input", false);
             SerializableFLProgram prog;
             if (Path.GetExtension(input) == "flc")
             {
@@ -62,8 +61,11 @@ namespace OpenFL.Commandline.Core.Systems
             {
                 Logger.Log(LogType.Log, "Running", 2);
                 program.Run(buffer, false, null, warmBuffers);
-
-                saveQueue.Enqueue((program, buffer, output));
+                Bitmap bmp = program.GetActiveBitmap();
+                bmp.Save(output);
+                bmp.Dispose();
+                buffer.Dispose();
+                program.FreeResources();
 
             }
             catch (FLInvalidEntryPointException)
@@ -73,44 +75,7 @@ namespace OpenFL.Commandline.Core.Systems
 
         }
 
-        protected override void BeforeRun()
-        {
-            base.BeforeRun();
-            saveTask = new Task(SaveThreadLoop);
-            saveTask.Start();
-        }
-
-
-        protected override void AfterRun()
-        {
-            base.AfterRun();
-            lock (lockObject) exitRequested = true;
-
-            Task.WaitAll(saveTask);
-        }
-
-        private void SaveThreadLoop()
-        {
-            bool exit = false;
-            do
-            {
-                if (saveQueue.IsEmpty)
-                    Thread.Sleep(100);
-                else if (saveQueue.TryDequeue(out (FLProgram, FLBuffer, string) result))
-                {
-                    Bitmap bmp = result.Item1.GetActiveBitmap();
-                    Logger.Log(LogType.Log, "Saving: " + result.Item3, exit ? 0 : 2);
-                    bmp.Save(result.Item3);
-                    bmp.Dispose();
-                    result.Item1.FreeResources();
-                    result.Item2.Dispose();
-                }
-
-                lock (lockObject) exit = exitRequested;
-
-
-            } while (!exit || !saveQueue.IsEmpty);
-        }
+        
 
         protected override void AddCommands(Runner runner)
         {
