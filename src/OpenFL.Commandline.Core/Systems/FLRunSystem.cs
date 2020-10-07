@@ -64,13 +64,13 @@ namespace OpenFL.Commandline.Core.Systems
                 program.Run(buffer, false, null, warmBuffers);
 
                 saveQueue.Enqueue((program, buffer, output));
-                
+
             }
             catch (FLInvalidEntryPointException)
             {
                 Logger.Log(LogType.Log, "No Entry Point Found. Skipping", 2);
             }
-            
+
         }
 
         protected override void BeforeRun()
@@ -99,7 +99,7 @@ namespace OpenFL.Commandline.Core.Systems
                 else if (saveQueue.TryDequeue(out (FLProgram, FLBuffer, string) result))
                 {
                     Bitmap bmp = result.Item1.GetActiveBitmap();
-                    Logger.Log(LogType.Log, "Saving: " + result.Item3, 2);
+                    Logger.Log(LogType.Log, "Saving: " + result.Item3, exit ? 0 : 2);
                     bmp.Save(result.Item3);
                     bmp.Dispose();
                     result.Item1.FreeResources();
