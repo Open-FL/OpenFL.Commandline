@@ -149,6 +149,11 @@ namespace OpenFL.Commandline.Core.Systems
         {
         }
 
+        protected virtual void AfterRun()
+        {
+
+        }
+
         protected abstract void Run(string input, string output);
 
         protected abstract void AddCommands(Runner runner);
