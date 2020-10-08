@@ -23,6 +23,8 @@ namespace OpenFL.Commandline.Core.Systems
     public abstract class FLCommandlineSystem : ALoggable<LogType>, ICommandlineSystem
     {
 
+        private FLProgramCheckType CheckTypes = FLProgramCheckType.InputValidation;
+
         private string[] Input = new string[0];
         private bool NoDialog;
 
@@ -30,7 +32,10 @@ namespace OpenFL.Commandline.Core.Systems
 
         private int Verbosity = 1;
 
-        private FLProgramCheckType CheckTypes = FLProgramCheckType.InputValidation;
+        protected FLCommandlineSystem() : base(OpenFLDebugConfig.Settings)
+        {
+            Logger.SetSubProjectName(Name);
+        }
 
 
         public virtual bool ExpandInputDirectories => false;
@@ -40,11 +45,6 @@ namespace OpenFL.Commandline.Core.Systems
         public abstract string[] SupportedOutputExtensions { get; }
 
         public abstract string Name { get; }
-
-        protected FLCommandlineSystem() : base(OpenFLDebugConfig.Settings)
-        {
-            Logger.SetSubProjectName(Name);
-        }
 
         public void Run(string[] args)
         {
@@ -69,7 +69,12 @@ namespace OpenFL.Commandline.Core.Systems
                          );
             r._AddCommand(
                           new SetDataCommand(
-                                             strings => CheckTypes = (FLProgramCheckType)Enum.Parse(typeof(FLProgramCheckType), strings.First(), true),
+                                             strings => CheckTypes =
+                                                            (FLProgramCheckType) Enum.Parse(
+                                                                 typeof(FLProgramCheckType),
+                                                                 strings.First(),
+                                                                 true
+                                                                ),
                                              new[] { "--checks", "-checks" },
                                              $"Program Check Profile. (Available: {Enum.GetNames(typeof(FLProgramCheckType)).Unpack(", ")})"
                                             )
@@ -77,10 +82,12 @@ namespace OpenFL.Commandline.Core.Systems
             r._AddCommand(new DefaultHelpCommand(true));
             AddCommands(r);
             r._RunCommands(args);
-            foreach (KeyValuePair<IProjectDebugConfig, List<ADLLogger>> keyValuePair in ADLLogger.GetReadOnlyLoggerMap())
+            foreach (KeyValuePair<IProjectDebugConfig, List<ADLLogger>> keyValuePair in ADLLogger.GetReadOnlyLoggerMap()
+            )
             {
                 keyValuePair.Key.SetMinSeverity(Verbosity);
             }
+
             OpenFLDebugConfig.Settings.SetMinSeverity(Verbosity);
 
             FLData.InitializeFL(NoDialog, CheckTypes);
@@ -123,9 +130,10 @@ namespace OpenFL.Commandline.Core.Systems
                                                    SupportedOutputExtensions.First()
                                                   )
                                     : Output[i];
-                FLData.SetProgress($"{Path.GetFileName(input)} => {Path.GetFileName(output)}",
+                FLData.SetProgress(
+                                   $"{Path.GetFileName(input)} => {Path.GetFileName(output)}",
                                    0,
-                                   i+1,
+                                   i + 1,
                                    Input.Length
                                   );
                 if (!SupportedOutputExtensions.Select(x => string.IsNullOrEmpty(x) ? "" : "." + x)
@@ -153,7 +161,6 @@ namespace OpenFL.Commandline.Core.Systems
 
         protected virtual void AfterRun()
         {
-
         }
 
         protected abstract void Run(string input, string output);
@@ -166,9 +173,13 @@ namespace OpenFL.Commandline.Core.Systems
             {
                 if (!FLData.Container.CheckBuilder.Attach(FLData.Container.Parser, true))
                 {
-                    throw new PipelineNotValidException(FLData.Container.Parser, "Check builder contains invalid Checks.");
+                    throw new PipelineNotValidException(
+                                                        FLData.Container.Parser,
+                                                        "Check builder contains invalid Checks."
+                                                       );
                 }
             }
+
             return FLData.Container.Parser.Process(new FLParserInput(input, true, defines));
         }
 

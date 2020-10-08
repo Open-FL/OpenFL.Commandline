@@ -18,8 +18,6 @@ using PluginSystem.Core.Pointer;
 using PluginSystem.FileSystem;
 
 using Utility.ADL;
-using Utility.ADL.Configs;
-using Utility.ExtPP.Base;
 using Utility.IO.Callbacks;
 using Utility.IO.VirtualFS;
 using Utility.TypeManagement;
@@ -32,7 +30,7 @@ namespace OpenFL.Commandline.Core
         private static readonly PluginHost Host = new PluginHost();
 
         private static readonly ADLLogger<LogType> Logger = new ADLLogger<LogType>(OpenFLDebugConfig.Settings, "CLI");
-            
+
 
         private static bool NoDialogs;
 
@@ -59,7 +57,7 @@ namespace OpenFL.Commandline.Core
             NoDialogs = noDialogs;
             int maxTasks = 6;
 
-            Logger.Log(LogType.Log,"Initializing FS", 1);
+            Logger.Log(LogType.Log, "Initializing FS", 1);
             PrepareFileSystem();
 
             SetProgress("Initializing Logging System", 0, 1, maxTasks);
@@ -79,7 +77,12 @@ namespace OpenFL.Commandline.Core
             SetProgress("Initializing FL", 0, 5, maxTasks);
             Container = InitializeCLKernels("resources/kernel");
 
-            FLProgramCheckBuilder builder = FLProgramCheckBuilder.CreateDefaultCheckBuilder(Container.InstructionSet, Container.BufferCreator, checkType);
+            FLProgramCheckBuilder builder =
+                FLProgramCheckBuilder.CreateDefaultCheckBuilder(
+                                                                Container.InstructionSet,
+                                                                Container.BufferCreator,
+                                                                checkType
+                                                               );
             Container.SetCheckBuilder(builder);
 
             SetProgress("Finished", 0, 6, maxTasks);
@@ -158,10 +161,11 @@ namespace OpenFL.Commandline.Core
 
                 foreach (string file in files)
                 {
-                    Logger.Log(LogType.Log,
-                        $"[{fileCount}/{files.Length}]Loading: {file} ({kernelCount})",
-                        2
-                       );
+                    Logger.Log(
+                               LogType.Log,
+                               $"[{fileCount}/{files.Length}]Loading: {file} ({kernelCount})",
+                               2
+                              );
                     try
                     {
                         CLProgram prog = dataBase.AddProgram(instance, file, false, out CLProgramBuildResult res);

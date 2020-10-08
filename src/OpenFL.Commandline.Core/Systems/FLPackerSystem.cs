@@ -85,13 +85,13 @@ namespace OpenFL.Commandline.Core.Systems
                 string[] files = Directory.GetFiles(dir, "*.fl", SearchOption.AllDirectories);
 
                 maxProgress += files.Length;
-                FLData.SetProgress( "Exporting FL Scripts..", 1, currentProgress, maxProgress);
+                FLData.SetProgress("Exporting FL Scripts..", 1, currentProgress, maxProgress);
                 currentProgress++;
                 for (int i = 0; i < files.Length; i++)
                 {
                     string file = files[i];
 
-                    FLData.SetProgress( "Exporting File:" + file, 2, currentProgress, maxProgress);
+                    FLData.SetProgress("Exporting File:" + file, 2, currentProgress, maxProgress);
                     currentProgress++;
 
                     SerializableFLProgram prog = Parse(file, Defines);
@@ -106,7 +106,7 @@ namespace OpenFL.Commandline.Core.Systems
                 }
             }
 
-            FLData.SetProgress($"Creating Package.", 1, currentProgress, maxProgress);
+            FLData.SetProgress("Creating Package.", 1, currentProgress, maxProgress);
             currentProgress++;
 
             Directory.SetCurrentDirectory(oldDir);
@@ -118,7 +118,7 @@ namespace OpenFL.Commandline.Core.Systems
                                    null
                                   );
 
-            FLData.SetProgress($"Cleaning Up.", 1, currentProgress, maxProgress);
+            FLData.SetProgress("Cleaning Up.", 1, currentProgress, maxProgress);
         }
 
         private void CopyDirectory(string source, string target)
