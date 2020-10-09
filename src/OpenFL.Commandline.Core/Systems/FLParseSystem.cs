@@ -8,7 +8,7 @@ using Utility.CommandRunner;
 
 namespace OpenFL.Commandline.Core.Systems
 {
-    public class FLParseSystem : FLCommandlineSystem
+    public class FLParseSystem : FLProcessingCommandlineSystem
     {
 
         private string[] Defines = new string[0];

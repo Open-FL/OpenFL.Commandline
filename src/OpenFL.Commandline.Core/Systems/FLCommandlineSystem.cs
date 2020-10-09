@@ -20,80 +20,28 @@ using Utility.ObjectPipeline;
 
 namespace OpenFL.Commandline.Core.Systems
 {
-    public abstract class FLCommandlineSystem : ALoggable<LogType>, ICommandlineSystem
+    public abstract class FLProcessingCommandlineSystem: FLCommandlineSystem
     {
 
-        private FLProgramCheckType CheckTypes = FLProgramCheckType.InputValidation;
 
         private string[] Input = new string[0];
-        private bool NoDialog;
-
         private string[] Output = new string[0];
-
-        private int Verbosity = 1;
-
-        protected FLCommandlineSystem() : base(OpenFLDebugConfig.Settings)
-        {
-            Logger.SetSubProjectName(Name);
-        }
-
-
         public virtual bool ExpandInputDirectories => false;
 
         public abstract string[] SupportedInputExtensions { get; }
 
         public abstract string[] SupportedOutputExtensions { get; }
 
-        public abstract string Name { get; }
-
-        public void Run(string[] args)
+        protected override void AddCommands(Runner runner)
         {
-            Debug.OnConfigCreate += ProjectDebugConfig_OnConfigCreate;
+            runner._AddCommand(new SetDataCommand(s => Input = s, new[] { "--input", "-i" }, "Set Input Files"));
+            runner._AddCommand(new SetDataCommand(s => Output = s, new[] { "--output", "-o" }, "Set Output Files"));
+        }
 
-            Runner r = new Runner();
-            r._AddCommand(new SetDataCommand(s => Input = s, new[] { "--input", "-i" }, "Set Input Files"));
-            r._AddCommand(new SetDataCommand(s => Output = s, new[] { "--output", "-o" }, "Set Output Files"));
-            r._AddCommand(
-                          new SetDataCommand(
-                                             s => NoDialog = true,
-                                             new[] { "--yes" },
-                                             "Answer all dialogs with Yes"
-                                            )
-                         );
-            r._AddCommand(
-                          new SetDataCommand(
-                                             strings => Verbosity = int.Parse(strings.First()),
-                                             new[] { "--verbosity", "-v" },
-                                             "The Verbosity Level (lower = less logs)"
-                                            )
-                         );
-            r._AddCommand(
-                          new SetDataCommand(
-                                             strings => CheckTypes =
-                                                            (FLProgramCheckType) Enum.Parse(
-                                                                 typeof(FLProgramCheckType),
-                                                                 strings.First(),
-                                                                 true
-                                                                ),
-                                             new[] { "--checks", "-checks" },
-                                             $"Program Check Profile. (Available: {Enum.GetNames(typeof(FLProgramCheckType)).Unpack(", ")})"
-                                            )
-                         );
-            r._AddCommand(new DefaultHelpCommand(true));
-            AddCommands(r);
-            r._RunCommands(args);
-            foreach (KeyValuePair<IProjectDebugConfig, List<ADLLogger>> keyValuePair in ADLLogger.GetReadOnlyLoggerMap()
-            )
-            {
-                keyValuePair.Key.SetMinSeverity(Verbosity);
-            }
+        protected abstract void Run(string input, string output);
 
-            OpenFLDebugConfig.Settings.SetMinSeverity(Verbosity);
-
-            FLData.InitializeFL(NoDialog, CheckTypes);
-
-            BeforeRun();
-
+        protected override void DoRun(string[] args)
+        {
             if (ExpandInputDirectories)
             {
                 List<string> newInput = new List<string>();
@@ -144,6 +92,80 @@ namespace OpenFL.Commandline.Core.Systems
 
                 Run(input, output);
             }
+        }
+
+    }
+
+
+    public abstract class FLCommandlineSystem : ALoggable<LogType>, ICommandlineSystem
+    {
+
+        private FLProgramCheckType CheckTypes = FLProgramCheckType.InputValidation;
+
+        private bool NoDialog;
+
+        private int Verbosity = 1;
+
+        public abstract string Name { get; }
+
+
+
+        protected FLCommandlineSystem() : base(OpenFLDebugConfig.Settings)
+        {
+            Logger.SetSubProjectName(Name);
+        }
+
+
+
+
+        public void Run(string[] args)
+        {
+            Debug.OnConfigCreate += ProjectDebugConfig_OnConfigCreate;
+
+            Runner r = new Runner();
+            
+            r._AddCommand(
+                          new SetDataCommand(
+                                             s => NoDialog = true,
+                                             new[] { "--yes" },
+                                             "Answer all dialogs with Yes"
+                                            )
+                         );
+            r._AddCommand(
+                          new SetDataCommand(
+                                             strings => Verbosity = int.Parse(strings.First()),
+                                             new[] { "--verbosity", "-v" },
+                                             "The Verbosity Level (lower = less logs)"
+                                            )
+                         );
+            r._AddCommand(
+                          new SetDataCommand(
+                                             strings => CheckTypes =
+                                                            (FLProgramCheckType) Enum.Parse(
+                                                                 typeof(FLProgramCheckType),
+                                                                 strings.First(),
+                                                                 true
+                                                                ),
+                                             new[] { "--checks", "-checks" },
+                                             $"Program Check Profile. (Available: {Enum.GetNames(typeof(FLProgramCheckType)).Unpack(", ")})"
+                                            )
+                         );
+            r._AddCommand(new DefaultHelpCommand(true));
+            AddCommands(r);
+            r._RunCommands(args);
+            foreach (KeyValuePair<IProjectDebugConfig, List<ADLLogger>> keyValuePair in ADLLogger.GetReadOnlyLoggerMap()
+            )
+            {
+                keyValuePair.Key.SetMinSeverity(Verbosity);
+            }
+
+            OpenFLDebugConfig.Settings.SetMinSeverity(Verbosity);
+
+            FLData.InitializeFL(NoDialog, CheckTypes);
+
+            BeforeRun();
+
+            DoRun(args);
 
             AfterRun();
 
@@ -155,6 +177,8 @@ namespace OpenFL.Commandline.Core.Systems
             obj.SetMinSeverity(Verbosity);
         }
 
+        protected abstract void DoRun(string[] args);
+
         protected virtual void BeforeRun()
         {
         }
@@ -163,7 +187,6 @@ namespace OpenFL.Commandline.Core.Systems
         {
         }
 
-        protected abstract void Run(string input, string output);
 
         protected abstract void AddCommands(Runner runner);
 

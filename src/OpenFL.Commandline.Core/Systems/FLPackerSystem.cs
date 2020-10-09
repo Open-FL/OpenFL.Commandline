@@ -9,7 +9,7 @@ using Utility.CommandRunner;
 
 namespace OpenFL.Commandline.Core.Systems
 {
-    public class FLPackerSystem : FLCommandlineSystem
+    public class FLPackerSystem : FLProcessingCommandlineSystem
     {
 
         private string[] Defines = new string[0];

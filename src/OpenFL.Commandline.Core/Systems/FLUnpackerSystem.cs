@@ -4,7 +4,7 @@ using Utility.CommandRunner;
 
 namespace OpenFL.Commandline.Core.Systems
 {
-    public class FLUnpackerSystem : FLCommandlineSystem
+    public class FLUnpackerSystem : FLProcessingCommandlineSystem
     {
 
         public override string Name => "unpacker";

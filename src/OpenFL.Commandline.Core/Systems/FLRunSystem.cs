@@ -19,7 +19,7 @@ using Utility.CommandRunner;
 
 namespace OpenFL.Commandline.Core.Systems
 {
-    public class FLRunSystem : FLCommandlineSystem
+    public class FLRunSystem : FLProcessingCommandlineSystem
     {
 
         private int count;
