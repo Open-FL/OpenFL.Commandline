@@ -33,6 +33,7 @@ namespace OpenFL.Commandline.Core.Systems
 
         protected override void AddCommands(Runner runner)
         {
+            base.AddCommands(runner);
             runner._AddCommand(new SetDataCommand(s => Defines = s, new[] { "--defines", "-d" }, "Set Define Tags"));
             runner._AddCommand(
                                new SetDataCommand(

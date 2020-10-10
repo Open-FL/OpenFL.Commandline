@@ -26,10 +26,7 @@ namespace OpenFL.Commandline.Core.Systems
             ResourceManager.AddUnpacker(new FLC2TexUnpacker(FLData.Container));
             ResourceManager.AddUnpacker(new FLRESUnpacker());
         }
-
-        protected override void AddCommands(Runner runner)
-        {
-        }
+        
 
     }
 }
