@@ -20,12 +20,12 @@ using Utility.ObjectPipeline;
 
 namespace OpenFL.Commandline.Core.Systems
 {
-    public abstract class FLProcessingCommandlineSystem: FLCommandlineSystem
+    public abstract class FLProcessingCommandlineSystem : FLCommandlineSystem
     {
-
 
         private string[] Input = new string[0];
         private string[] Output = new string[0];
+
         public virtual bool ExpandInputDirectories => false;
 
         public abstract string[] SupportedInputExtensions { get; }
@@ -100,16 +100,13 @@ namespace OpenFL.Commandline.Core.Systems
     public abstract class FLCommandlineSystem : ALoggable<LogType>, ICommandlineSystem
     {
 
+        protected bool AbortRun = false;
+
         private FLProgramCheckType CheckTypes = FLProgramCheckType.InputValidation;
 
         private bool NoDialog;
 
         private int Verbosity = 1;
-
-        protected bool AbortRun = false;
-
-        public abstract string Name { get; }
-
 
 
         protected FLCommandlineSystem() : base(OpenFLDebugConfig.Settings)
@@ -117,7 +114,7 @@ namespace OpenFL.Commandline.Core.Systems
             Logger.SetSubProjectName(Name);
         }
 
-
+        public abstract string Name { get; }
 
 
         public void Run(string[] args)
@@ -127,7 +124,7 @@ namespace OpenFL.Commandline.Core.Systems
             AbstractCommand.MIN_COMMAND_SEVERITY = 0;
 
             Runner r = new Runner();
-            
+
             r._AddCommand(
                           new SetDataCommand(
                                              s => NoDialog = true,
@@ -164,6 +161,7 @@ namespace OpenFL.Commandline.Core.Systems
                 Console.ReadLine();
                 return;
             }
+
             foreach (KeyValuePair<IProjectDebugConfig, List<ADLLogger>> keyValuePair in ADLLogger.GetReadOnlyLoggerMap()
             )
             {

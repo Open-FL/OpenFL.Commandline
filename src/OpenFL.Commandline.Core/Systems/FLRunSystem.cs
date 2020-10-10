@@ -16,23 +16,23 @@ using OpenFL.Core.Exceptions;
 
 using Utility.ADL;
 using Utility.CommandRunner;
-using Utility.CommandRunner.BuiltInCommands.SetSettings;
 
 namespace OpenFL.Commandline.Core.Systems
 {
     public class FLRunSystem : FLProcessingCommandlineSystem
     {
 
+        private readonly object lockObject = new object();
+
+        private readonly ConcurrentQueue<(FLBuffer, CLAPI, string, string)> saveQueue =
+            new ConcurrentQueue<(FLBuffer, CLAPI, string, string)>();
+
         private int count;
 
         private string[] defines = new string[0];
         private bool exitRequested;
-        private readonly object lockObject = new object();
         private int resolutionX = 256;
         private int resolutionY = 256;
-
-        private readonly ConcurrentQueue<(FLBuffer, CLAPI, string, string)> saveQueue =
-            new ConcurrentQueue<(FLBuffer, CLAPI, string, string)>();
 
         private Task[] saveThread;
         private int totalCount;
@@ -148,6 +148,7 @@ namespace OpenFL.Commandline.Core.Systems
                     bmp.Dispose();
                     result.Item1.Dispose();
                 }
+
                 lock (lockObject)
                 {
                     exit = exitRequested;
