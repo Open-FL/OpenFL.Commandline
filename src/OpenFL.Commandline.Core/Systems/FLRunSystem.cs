@@ -16,6 +16,7 @@ using OpenFL.Core.Exceptions;
 
 using Utility.ADL;
 using Utility.CommandRunner;
+using Utility.CommandRunner.BuiltInCommands.SetSettings;
 
 namespace OpenFL.Commandline.Core.Systems
 {
@@ -147,7 +148,6 @@ namespace OpenFL.Commandline.Core.Systems
                     bmp.Dispose();
                     result.Item1.Dispose();
                 }
-
                 lock (lockObject)
                 {
                     exit = exitRequested;
