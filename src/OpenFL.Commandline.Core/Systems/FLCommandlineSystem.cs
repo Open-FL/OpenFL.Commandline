@@ -106,6 +106,8 @@ namespace OpenFL.Commandline.Core.Systems
 
         private int Verbosity = 1;
 
+        protected bool AbortRun = false;
+
         public abstract string Name { get; }
 
 
@@ -121,6 +123,8 @@ namespace OpenFL.Commandline.Core.Systems
         public void Run(string[] args)
         {
             Debug.OnConfigCreate += ProjectDebugConfig_OnConfigCreate;
+
+            AbstractCommand.MIN_COMMAND_SEVERITY = 0;
 
             Runner r = new Runner();
             
@@ -152,7 +156,14 @@ namespace OpenFL.Commandline.Core.Systems
                          );
             r._AddCommand(new DefaultHelpCommand(true));
             AddCommands(r);
+
+            Debug.DefaultInitialization();
             r._RunCommands(args);
+            if (AbortRun)
+            {
+                Console.ReadLine();
+                return;
+            }
             foreach (KeyValuePair<IProjectDebugConfig, List<ADLLogger>> keyValuePair in ADLLogger.GetReadOnlyLoggerMap()
             )
             {
