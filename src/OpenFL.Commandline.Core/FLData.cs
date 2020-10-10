@@ -18,6 +18,7 @@ using PluginSystem.Core.Pointer;
 using PluginSystem.FileSystem;
 
 using Utility.ADL;
+using Utility.CommandRunner;
 using Utility.IO.Callbacks;
 using Utility.IO.VirtualFS;
 using Utility.TypeManagement;
@@ -40,6 +41,7 @@ namespace OpenFL.Commandline.Core
 
         public static void InitializePluginSystemOnly(bool noDialogs)
         {
+            AbstractCommand.MIN_COMMAND_SEVERITY = 0;
             NoDialogs = noDialogs;
             int maxTasks = 3;
 
